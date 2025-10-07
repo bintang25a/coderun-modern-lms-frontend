@@ -1,0 +1,157 @@
+:root {
+  --primary: #2d2670;
+  --secondary: #624bff;
+
+  --white: #fff;
+  --black: #000;
+
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+
+  --px-8: 0.5vw;
+  --px-12: 0.75vw;
+  --px-16: 1vw;
+  --px-24: 1.5vw;
+  --px-32: 2vw;
+  --px-40: 2.5vw;
+  --px-48: 3vw;
+  --px-56: 3.5vw;
+  --px-64: 4vw;
+  --px-128: 8vw;
+  --px-192: 12vw;
+  --px-256: 16vw;
+
+  --spx-8: 1vh;
+  --spx-12: 1.5vh;
+  --spx-16: 2vh;
+  --spx-24: 3vh;
+  --spx-32: 4vh;
+  --spx-40: 5vh;
+  --spx-48: 6vh;
+  --spx-56: 7vh;
+  --spx-64: 8vh;
+  --spx-128: 16vh;
+  --spx-192: 24vh;
+  --spx-256: 32vh;
+
+  --fs-1: clamp(4px, 0.33vw, 0.675rem);
+  --fs-2: clamp(8px, 0.67vw, 1.25rem);
+  --fs-3: clamp(12px, 0.88vw, 1.75rem);
+  --fs-4: clamp(16px, 1.17vw, 2.25rem);
+  --fs-5: clamp(20px, 1.47vw, 3rem);
+  --fs-6: clamp(24px, 1.76vw, 3.5rem);
+  --fs-7: clamp(28px, 2.05vw, 4rem);
+  --fs-8: clamp(32px, 2.34vw, 5rem);
+  --fs-9: clamp(40px, 2.93vw, 6rem);
+  --fs-10: clamp(48px, 3.52vw, 7rem);
+  --fs-11: clamp(56px, 4.1vw, 8rem);
+  --fs-12: clamp(64px, 4.69vw, 9rem);
+
+  --btn-danger: #dc3545;
+  --btn-warning: #f59e0b;
+  --btn-info: #0dcaf0;
+  --btn-save: #28a745;
+  --btn-neutral: #868e96;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+/* 1. Use a more-intuitive box-sizing model */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 2. Remove default margin */
+* {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
+  border: none;
+  text-decoration: none;
+  scroll-behavior: smooth;
+}
+
+/* 3. Enable keyword animations */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    interpolate-size: allow-keywords;
+  }
+}
+
+body {
+  /* 4. Add accessible line-height */
+  line-height: 1.5;
+  /* 5. Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 6. Improve media defaults */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* 7. Inherit fonts for form controls */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* 8. Avoid text overflows */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* 9. Improve line wrapping */
+p {
+  text-wrap: pretty;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
+/*
+   10. Create a root stacking context
+ */
+#root,
+#__next {
+  isolation: isolate;
+}
+
+#root {
+  width: 100%;
+  height: max-content;
+}
