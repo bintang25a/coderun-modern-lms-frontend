@@ -3,7 +3,7 @@ import "../styles.css";
 
 export default function HomePage() {
   const [language, setLanguage] = useState("c");
-  const [code, setCode] = useState("");
+  const [codePath, setCode] = useState("");
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,10 +12,14 @@ export default function HomePage() {
     setLoading(true);
     setOutput("Menjalankan kode...");
     try {
-      const res = await fetch("http://localhost:3000/run", {
+      const res = await fetch("http://localhost:5000/run", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language, code, input }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJVMDAyIiwibmFtZSI6IlJpemt5IFByYXRhbWEiLCJyb2xlIjoiQXNpc3RlbiIsImlhdCI6MTc2MTQ2NDQ4OCwiZXhwIjoxNzYxNTUwODg4fQ.fwTWlyK6znTLDZJZYuayrwLTreHIq1KeX7u0ileKJIc",
+        },
+        body: JSON.stringify({ language, codePath, input }),
       });
       const data = await res.json();
       setOutput(data.output || "Tidak ada output.");
@@ -41,7 +45,7 @@ export default function HomePage() {
       <div className="editor">
         <label>Kode:</label>
         <textarea
-          value={code}
+          value={codePath}
           onChange={(e) => setCode(e.target.value)}
           placeholder="Tulis kode di sini..."
         />
@@ -62,7 +66,10 @@ export default function HomePage() {
 
       <div className="output">
         <label>Output:</label>
-        <pre>{output}</pre>
+
+        <pre>
+          <code>{output}</code>
+        </pre>
       </div>
     </div>
   );
