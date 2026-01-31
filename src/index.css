@@ -1,46 +1,32 @@
 :root {
-  --primary: #2d2670;
-  --secondary: #624bff;
+  --primary: #005461;
+  --secondary: #018790;
+  --thirdnary: #00b7b5;
 
   --white: #fff;
+  --gray-50: #f4f4f4;
+  --gray-100: #b2c0cd;
+  --gray-200: #96a5b3;
+  --gray-300: #637381;
+  --gray-400: #454f5b;
+  --gray-500: #1e1e1e;
   --black: #000;
 
-  --gray-50: #f8fafc;
-  --gray-100: #f1f5f9;
-  --gray-200: #e2e8f0;
-  --gray-300: #cbd5e1;
-  --gray-400: #94a3b8;
-  --gray-500: #64748b;
-  --gray-600: #475569;
-  --gray-700: #334155;
-  --gray-800: #1e293b;
-  --gray-900: #0f172a;
-
-  --px-8: 0.5vw;
-  --px-12: 0.75vw;
-  --px-16: 1vw;
-  --px-24: 1.5vw;
-  --px-32: 2vw;
-  --px-40: 2.5vw;
-  --px-48: 3vw;
-  --px-56: 3.5vw;
-  --px-64: 4vw;
-  --px-128: 8vw;
-  --px-192: 12vw;
-  --px-256: 16vw;
-
-  --spx-8: 1vh;
-  --spx-12: 1.5vh;
-  --spx-16: 2vh;
-  --spx-24: 3vh;
-  --spx-32: 4vh;
-  --spx-40: 5vh;
-  --spx-48: 6vh;
-  --spx-56: 7vh;
-  --spx-64: 8vh;
-  --spx-128: 16vh;
-  --spx-192: 24vh;
-  --spx-256: 32vh;
+  --px-2: calc((0.04vw + 0.36vh) / 2);
+  --px-4: calc((0.08vw + 0.72vh) / 2);
+  --px-8: calc((0.16vw + 1.44vh) / 2);
+  --px-12: calc((0.24vw + 2.16vh) / 2);
+  --px-16: calc((0.32vw + 2.88vh) / 2);
+  --px-24: calc((0.48vw + 4.32vh) / 2);
+  --px-32: calc((0.64vw + 5.76vh) / 2);
+  --px-40: calc((0.8vw + 7.2vh) / 2);
+  --px-48: calc((0.96vw + 8.64vh) / 2);
+  --px-56: calc((1.12vw + 10.08vh) / 2);
+  --px-64: calc((1.28vw + 11.52vh) / 2);
+  --px-128: calc((2.56vw + 23.04vh) / 2);
+  --px-192: calc((3.84vw + 34.56vh) / 2);
+  --px-256: calc((5.12vw + 46.08vh) / 2);
+  --px-512: calc((10.24vw + 92.16vh) / 2);
 
   --fs-1: clamp(4px, 0.33vw, 0.675rem);
   --fs-2: clamp(8px, 0.67vw, 1.25rem);
@@ -85,6 +71,7 @@ body {
   border: none;
   text-decoration: none;
   scroll-behavior: smooth;
+  transition: 0.3s ease-in-out;
 }
 
 /* 3. Enable keyword animations */

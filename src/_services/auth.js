@@ -25,7 +25,7 @@ export const validateToken = async () => {
   if (!token) return false;
 
   try {
-    const response = await API.get("/validate-token", {
+    const response = await API.get("/check", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
