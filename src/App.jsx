@@ -6,6 +6,8 @@ import ProtectedRole from "./components/auth/ProtectedRole";
 import Login from "./pages/auth/Login";
 import StudentLayout from "./layouts/StudentLayout";
 import AdminLayout from "./layouts/AdminLayout";
+import Users from "./pages/admin/users";
+import Classrooms from "./pages/admin/classrooms";
 
 export default function App() {
   return (
@@ -26,7 +28,11 @@ export default function App() {
         </Route>
 
         <Route element={<ProtectedRole allowedRoles={["Admin"]} />}>
-          <Route path="admin" element={<AdminLayout />}></Route>
+          <Route path="admin" element={<AdminLayout />}>
+            <Route index element={<main>Haii</main>} />
+            <Route path="users" element={<Users />} />
+            <Route path="classrooms" element={<Classrooms />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

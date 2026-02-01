@@ -1,6 +1,9 @@
+import { FaCircleCheck, FaCircleExclamation } from "react-icons/fa6";
 import "./screen.css";
 
-const Alert = ({ isActive, message, onClose }) => {
+const Alert = ({ alertSetting, onClose }) => {
+  const { isActive, message, isSuccess = false } = alertSetting;
+
   if (!isActive) return null;
 
   const parseMessage = (msg) => {
@@ -15,8 +18,12 @@ const Alert = ({ isActive, message, onClose }) => {
     <div className="alert-overlay">
       <div className="box">
         <div className="message">{parseMessage(message)}</div>
-        <button className="button" onClick={onClose}>
-          OK
+        <button
+          className={`button ${isSuccess ? "save" : "danger"}`}
+          onClick={onClose}
+          title="Confirm"
+        >
+          {isSuccess ? <FaCircleCheck /> : <FaCircleExclamation />} OK
         </button>
       </div>
     </div>

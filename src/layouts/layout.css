@@ -1,9 +1,12 @@
 #root {
+  max-width: 100vw;
   width: 100%;
+  max-height: 100vh;
   height: 100vh;
-  min-height: 100vh;
+  min-height: fit-content;
 
   display: flex;
+  overflow: hidden;
 }
 
 .layout-aside::-webkit-scrollbar {
@@ -12,7 +15,8 @@
 
 .layout-aside {
   flex: 1;
-  min-width: 280px;
+  min-width: 20%;
+  width: 20%;
 
   padding: var(--px-32);
 
@@ -40,6 +44,8 @@
     padding-bottom: var(--px-16);
     border-bottom: var(--px-4) solid var(--gray-50);
 
+    background-color: var(--primary);
+
     position: sticky;
     top: 0;
 
@@ -65,7 +71,7 @@
       text-shadow: var(--px-2) var(--px-2) 4px var(--gray-500);
 
       h1 {
-        font-size: var(--fs-6);
+        font-size: var(--fs-7);
         font-weight: 600;
         line-height: 1;
       }
@@ -95,7 +101,7 @@
 
       padding: var(--px-8) 0;
 
-      font-size: var(--fs-5);
+      font-size: var(--fs-6);
       font-weight: 400;
       color: var(--white);
 
@@ -117,7 +123,8 @@
 
 .layout {
   flex: 4;
-  width: 100%;
+  max-height: 100vh;
+  height: 100%;
 
   display: flex;
   flex-direction: column;
@@ -125,6 +132,8 @@
   align-items: start;
 
   background-color: var(--gray-50);
+
+  position: relative;
 
   .header {
     width: 100%;
@@ -148,7 +157,7 @@
       padding: var(--px-8);
 
       .action-list {
-        font-size: var(--fs-7);
+        font-size: var(--fs-8);
         background-color: transparent;
         color: var(--primary);
         cursor: pointer;
@@ -171,14 +180,14 @@
         text-align: right;
 
         h1 {
-          font-size: var(--fs-4);
+          font-size: var(--fs-6);
           font-weight: 500;
           line-height: 1;
           color: var(--gray-500);
         }
 
         span {
-          font-size: var(--fs-3);
+          font-size: var(--fs-4);
           font-weight: 400;
           color: var(--gray-400);
         }
@@ -203,6 +212,15 @@
 
   main {
     flex: 1;
+    width: 100%;
+    max-height: 100%;
+    padding: var(--px-24);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: stretch;
+    gap: var(--px-24);
   }
 
   .footer {
@@ -210,7 +228,7 @@
     text-align: center;
     padding: var(--px-16);
 
-    font-size: var(--fs-3);
+    font-size: var(--fs-4);
     font-weight: 500;
     color: var(--primary);
 

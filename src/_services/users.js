@@ -1,12 +1,12 @@
 import API from "../_api";
 import message from "../_utilities/errorMessage";
 
-export const getMembers = async () => {
+export const getUsers = async () => {
   const { data: response } = await API.get("/users");
   return response.data;
 };
 
-export const showMember = async (uid) => {
+export const showUser = async (uid) => {
   try {
     const { data: response } = await API.get(`/users/${uid}`);
     return response.data;
@@ -16,7 +16,7 @@ export const showMember = async (uid) => {
   }
 };
 
-export const createMember = async (data) => {
+export const createUser = async (data) => {
   try {
     const response = await API.post("/users", data);
     return response.data;
@@ -26,9 +26,9 @@ export const createMember = async (data) => {
   }
 };
 
-export const updateMember = async (uid, data) => {
+export const updateUser = async (uid, data) => {
   try {
-    const response = await API.post(`users/${uid}`, data);
+    const response = await API.patch(`users/${uid}`, data);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -36,7 +36,7 @@ export const updateMember = async (uid, data) => {
   }
 };
 
-export const deleteMember = async (uid) => {
+export const deleteUser = async (uid) => {
   try {
     const response = await API.delete(`users/${uid}`);
     return response.data;

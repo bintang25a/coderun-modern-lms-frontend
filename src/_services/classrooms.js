@@ -28,7 +28,7 @@ export const createClassroom = async (data) => {
 
 export const updateClassroom = async (classCode, data) => {
   try {
-    const response = await API.post(`classrooms/${classCode}`, data);
+    const response = await API.patch(`classrooms/${classCode}`, data);
     return response.data;
   } catch (error) {
     console.log(error);

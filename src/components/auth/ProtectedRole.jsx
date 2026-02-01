@@ -25,8 +25,6 @@ export default function ProtectedRole({ allowedRoles }) {
   const user = getAuthUser();
   const location = useLocation();
 
-  console.log(user.role);
-
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

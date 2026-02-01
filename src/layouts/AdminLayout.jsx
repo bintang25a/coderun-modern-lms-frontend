@@ -1,15 +1,19 @@
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import "./layout.css";
 import { logout } from "../_services/auth";
 import { useEffect, useState } from "react";
-import Loading from "../components/screen/Loading";
 import Sidebar from "../components/layout/Sidebar";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
+import Loading from "../components/screen/Loading";
+import Alert from "../components/screen/Alert";
+import Confirm from "../components/screen/Confirm";
 
 export default function AdminLayout() {
   const [user, setUser] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [alertSetting, setAllertSetting] = useState({});
+  const [confirmSetting, setConfirmSetting] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,6 +42,24 @@ export default function AdminLayout() {
     alert("REFRESHHH");
   };
 
+  const switchLoading = (on) => {
+    on ? setIsLoading(true) : setIsLoading(false);
+  };
+
+  const switchAlert = (on) => {
+    setAllertSetting({
+      ...alertSetting,
+      isActive: on ? true : false,
+    });
+  };
+
+  const switchConfirm = (on) => {
+    setConfirmSetting({
+      ...confirmSetting,
+      isActive: on ? true : false,
+    });
+  };
+
   return (
     <>
       <Sidebar role={user.role} />
@@ -47,11 +69,21 @@ export default function AdminLayout() {
           handleLogout={handleLogout}
           handleRefresh={handleRefresh}
         />
-        <main>INI MAIN</main>
+        <Outlet
+          context={{
+            switchLoading,
+            switchAlert,
+            switchConfirm,
+            setAllertSetting,
+            setConfirmSetting,
+          }}
+        />
         <Footer />
       </div>
 
       <Loading isActive={isLoading} />
+      <Alert alertSetting={alertSetting} onClose={() => switchAlert(false)} />
+      <Confirm confirmSetting={confirmSetting} />
     </>
   );
 }
