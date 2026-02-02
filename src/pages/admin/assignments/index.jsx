@@ -329,7 +329,7 @@ const AddEditData = (param) => {
   );
 };
 
-export default function Classrooms() {
+export default function Assignments() {
   const [data, setData] = useState([]);
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);

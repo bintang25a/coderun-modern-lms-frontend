@@ -8,6 +8,8 @@ import StudentLayout from "./layouts/StudentLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import Users from "./pages/admin/users";
 import Classrooms from "./pages/admin/classrooms";
+import Materials from "./pages/admin/materials";
+import Assignments from "./pages/admin/assignments";
 
 export default function App() {
   return (
@@ -32,6 +34,8 @@ export default function App() {
             <Route index element={<main>Haii</main>} />
             <Route path="users" element={<Users />} />
             <Route path="classrooms" element={<Classrooms />} />
+            <Route path="materials" element={<Materials />} />
+            <Route path="assignments" element={<Assignments />} />
           </Route>
         </Route>
       </Routes>

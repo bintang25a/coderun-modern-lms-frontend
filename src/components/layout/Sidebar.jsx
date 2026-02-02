@@ -13,21 +13,23 @@ import {
 import { FaUsersBetweenLines } from "react-icons/fa6";
 
 const MainGeneral = () => {
+  const fixRole = "student";
+
   return (
     <main className="content">
-      <Link to={"/student/dashboard"} className="nav-list">
+      <Link to={`/${fixRole}`} className="nav-list">
         <FaHome className="icon" />
         Dashboard
       </Link>
-      <Link to={"/student/classroom"} className="nav-list">
+      <Link to={`/${fixRole}/classrooms`} className="nav-list">
         <FaChalkboard className="icon" />
         Classroom
       </Link>
-      <Link to={"/student/material"} className="nav-list">
+      <Link to={`/${fixRole}/materials`} className="nav-list">
         <FaBookOpen className="icon" />
         Material
       </Link>
-      <Link to={"/student/assignment"} className="nav-list">
+      <Link to={`/${fixRole}/assignments`} className="nav-list">
         <FaClipboardList className="icon" />
         Assignment
       </Link>
@@ -42,7 +44,7 @@ const MainGeneral = () => {
 const MainAdmin = () => {
   return (
     <main className="content">
-      <Link to={"/admin/dashboard"} className="nav-list">
+      <Link to={"/admin"} className="nav-list">
         <FaHome className="icon" />
         Dashboard
       </Link>

@@ -2,6 +2,8 @@ import { FaCircleCheck, FaCircleExclamation } from "react-icons/fa6";
 import "./screen.css";
 
 const Alert = ({ alertSetting, onClose }) => {
+  if (!alertSetting) return null;
+
   const { isActive, message, isSuccess = false } = alertSetting;
 
   if (!isActive) return null;

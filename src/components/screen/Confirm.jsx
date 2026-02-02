@@ -1,6 +1,8 @@
 import { FaCheck, FaTimes } from "react-icons/fa";
 
 const Confirm = ({ confirmSetting }) => {
+  if (!confirmSetting) return null;
+
   const { isActive, title, message, onConfirm, onCancel } = confirmSetting;
 
   if (!isActive) return null;

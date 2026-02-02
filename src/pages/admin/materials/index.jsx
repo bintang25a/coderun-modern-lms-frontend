@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import {
-  createClassroom,
-  deleteClassroom,
-  getClassrooms,
-  updateClassroom,
-} from "../../../_services/classrooms";
+  createMaterial,
+  deleteMaterial,
+  getMaterials,
+  updateMaterial,
+} from "../../../_services/materials";
 import "../admin.css";
 import {
   FaCircleXmark,
@@ -15,11 +15,6 @@ import {
 } from "react-icons/fa6";
 import { FaPaperPlane, FaUserMinus, FaUserPlus } from "react-icons/fa";
 import { useOutletContext } from "react-router-dom";
-import { getUsers } from "../../../_services/users";
-import {
-  createAssistant,
-  updateAssistant,
-} from "../../../_services/assistantClassroom";
 import {
   createStudent,
   deleteStudent,
@@ -151,13 +146,11 @@ const AddEditData = (param) => {
     allertSetting,
     fetchData,
     singleData = {},
-    assistants,
   } = param;
 
   const initiateForm = {
-    class_code: "",
-    name: "",
-    assistants: [],
+    title: "",
+    material: "",
   };
   const [formData, setFormData] = useState(
     !isEdit
@@ -166,79 +159,44 @@ const AddEditData = (param) => {
   );
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, files } = e.target;
 
-    if (name.startsWith("assistants_")) {
-      const index = parseInt(name.split("_")[1]);
+    console.log(formData);
 
-      const newAssistants = [...formData.assistants];
-      newAssistants[index] = value;
-
-      setFormData({
-        ...formData,
-        assistants: newAssistants,
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-    }
+    setFormData({
+      ...formData,
+      [name]: [name] == "material" ? files[0] : value,
+    });
   };
 
   const handleSubmit = async () => {
     isLoading(true);
 
     try {
-      !isEdit
-        ? await createClassroom(JSON.stringify(formData))
-        : await updateClassroom(
-            singleData?.class_code,
-            JSON.stringify(formData)
-          );
+      const dataToSend = new FormData();
 
-      const change = formData.assistants !== singleData.assistants;
-      let promises;
-      if (!isEdit || singleData.assistants.length < 2) {
-        promises = formData.assistants
-          ?.filter((id) => id)
-          .map((id) =>
-            createAssistant({
-              class_code: formData.class_code,
-              uid: id,
-            })
-          );
-      } else if (change) {
-        promises = formData.assistants
-          ?.filter((id) => id)
-          .map((newUid, index) => {
-            const oldUid = singleData.assistants[index]?.uid;
+      dataToSend.append("title", formData.title);
+      dataToSend.append("material", formData.material);
 
-            return updateAssistant(formData.class_code, oldUid, {
-              class_code: formData.class_code,
-              uid: newUid,
-            });
-          });
+      if (!isEdit) {
+        await createMaterial(dataToSend);
+      } else {
+        await updateMaterial(singleData?.class_code, dataToSend);
       }
-
-      if (change || !isEdit) await Promise.all(promises);
 
       onClose();
       setFormData(initiateForm);
-
       allertSetting({
-        ...allertSetting,
         isActive: true,
-        message: `${isEdit ? "Edit" : "Create"} data successfully`,
+        message: `${isEdit ? "Edit" : "Simpan"} data berhasil`,
         isSuccess: true,
       });
 
       await fetchData();
     } catch (error) {
       allertSetting({
-        ...allertSetting,
         isActive: true,
-        message: error,
+        message: error || "Gagal mengunggah file",
         isSuccess: false,
       });
     } finally {
@@ -253,68 +211,28 @@ const AddEditData = (param) => {
 
         <div className="input-container">
           <div className="input-field">
-            <label htmlFor="class_code">Class Code</label>
+            <label htmlFor="title">Title</label>
             <input
               type="text"
-              name="class_code"
-              id="class_code"
-              placeholder="DDP-A1.2.1-2025"
+              name="title"
+              id="title"
+              placeholder="Queue and Stack"
               autoComplete="new-email"
               onChange={handleChange}
-              value={formData?.class_code}
+              value={formData?.title}
               disabled={isEdit}
               required
             />
           </div>
           <div className="input-field">
-            <label htmlFor="name">Class Name</label>
+            <label htmlFor="material">Material</label>
             <input
-              type="text"
-              name="name"
-              id="name"
-              placeholder="Praktikum Dasar-dasar pemrograman"
+              type="file"
+              name="material"
+              id="material"
               onChange={handleChange}
-              value={formData?.name}
               required
             />
-          </div>
-          <div className="input-field">
-            <label htmlFor="assistants_0">Tutor</label>
-            <select
-              name="assistants_0"
-              id="assistants_0"
-              onChange={handleChange}
-              value={formData?.assistants[0]}
-            >
-              <option value="">Choose Tutor</option>
-              {assistants
-                ? assistants.map((assistant) => (
-                    <option
-                      key={assistant.uid}
-                      value={assistant.uid}
-                    >{`${assistant.uid} - ${assistant.name}`}</option>
-                  ))
-                : null}
-            </select>
-          </div>
-          <div className="input-field">
-            <label htmlFor="assistants_1">Assistant</label>
-            <select
-              name="assistants_1"
-              id="assistants_1"
-              onChange={handleChange}
-              value={formData?.assistants[1]}
-            >
-              <option value="">Choose Assistant</option>
-              {assistants
-                ? assistants.map((assistant) => (
-                    <option
-                      key={assistant.uid}
-                      value={assistant.uid}
-                    >{`${assistant.uid} - ${assistant.name}`}</option>
-                  ))
-                : null}
-            </select>
           </div>
         </div>
 
@@ -329,9 +247,8 @@ const AddEditData = (param) => {
   );
 };
 
-export default function Classrooms() {
+export default function Materials() {
   const [data, setData] = useState([]);
-  const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
   const [searchTerm, setSearchTerm] = useState("");
@@ -346,13 +263,9 @@ export default function Classrooms() {
 
   const fetchData = async () => {
     switchLoading(true);
-    const [storageData, usersData] = await Promise.all([
-      getClassrooms(),
-      getUsers(),
-    ]);
+    const [storageData] = await Promise.all([getMaterials()]);
 
     setData(storageData);
-    setUsers(usersData);
     switchLoading(false);
   };
 
@@ -361,7 +274,7 @@ export default function Classrooms() {
   }, []);
 
   const filteredData = data.filter((item) => {
-    const columnsToSearch = ["class_code", "name"];
+    const columnsToSearch = ["material_number", "title"];
 
     return columnsToSearch.some((key) => {
       const value = item[key];
@@ -439,7 +352,7 @@ export default function Classrooms() {
 
       switchLoading(true);
 
-      const deletePromises = selectedIds.map((id) => deleteClassroom(id));
+      const deletePromises = selectedIds.map((id) => deleteMaterial(id));
       await Promise.all(deletePromises);
 
       await fetchData();
@@ -467,7 +380,7 @@ export default function Classrooms() {
     <main className="admin-users">
       <nav>
         <section className="left">
-          <h1>Classrooms</h1>
+          <h1>Materials</h1>
         </section>
         <section className="right">
           <div className="action">
@@ -522,41 +435,37 @@ export default function Classrooms() {
                 <input type="checkbox" onChange={handleSelectAll} />
               </th>
               <th>ID</th>
-              <th>Name</th>
-              <th>Assistants</th>
-              <th>Total Students</th>
-              <th>Total Materials</th>
-              <th>Total Assignments</th>
+              <th>Assistant</th>
+              <th>Title</th>
+              <th>Material</th>
+              <th>Total Used</th>
             </tr>
           </thead>
           <tbody>
-            {data ? (
+            {data.length > 0 ? (
               currentData.map((item) => (
                 <tr
-                  key={item.class_code}
+                  key={item.material_number}
                   title={item.name}
-                  onClick={() => handleSelect(item.class_code)}
+                  onClick={() => handleSelect(item.material_number)}
                 >
-                  <td onClick={() => handleSelect(item.class_code)}>
+                  <td onClick={() => handleSelect(item.material_number)}>
                     <input
                       type="checkbox"
-                      checked={selectedIds.includes(item.class_code)}
-                      onChange={() => handleSelect(item.class_code)}
+                      checked={selectedIds.includes(item.material_number)}
+                      onChange={() => handleSelect(item.material_number)}
                     />
                   </td>
-                  <td>{item?.class_code}</td>
-                  <td>{item?.name}</td>
-                  <td>
-                    {item?.assistants?.map((assist) => assist.name).join(", ")}
-                  </td>
-                  <td>{item?.students?.length}</td>
-                  <td>{item?.materials?.length}</td>
-                  <td>{item?.assignments?.length}</td>
+                  <td>{item?.material_number}</td>
+                  <td>{item?.assistant}</td>
+                  <td>{item.title}</td>
+                  <td>{item?.material}</td>
+                  <td>{item?.classrooms?.length}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={6}>Users not found</td>
+                <td colSpan={6}>Data not found</td>
               </tr>
             )}
           </tbody>
@@ -602,12 +511,6 @@ export default function Classrooms() {
           isLoading={switchLoading}
           allertSetting={setAllertSetting}
           fetchData={fetchData}
-          users={users?.filter(
-            (user) =>
-              !data
-                ?.find((item) => item.class_code === selectedIds[0])
-                ?.students?.some((student) => student.uid === user.uid)
-          )}
           class_code={selectedIds[0]}
         />
       ) : null}
@@ -634,7 +537,6 @@ export default function Classrooms() {
           isLoading={switchLoading}
           allertSetting={setAllertSetting}
           fetchData={fetchData}
-          assistants={users?.filter((user) => user.role !== "Praktikan")}
         />
       ) : null}
 
@@ -647,7 +549,6 @@ export default function Classrooms() {
           allertSetting={setAllertSetting}
           fetchData={fetchData}
           singleData={data?.find((item) => item.class_code == selectedIds[0])}
-          assistants={users?.filter((user) => user.role !== "Praktikan")}
         />
       ) : null}
     </main>

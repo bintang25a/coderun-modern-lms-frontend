@@ -391,13 +391,6 @@
     }
 
     .action-form.wide {
-      .transfer-container {
-        display: flex;
-        gap: var(--px-16);
-        width: 100%;
-        margin-top: var(--px-16);
-      }
-
       .student-box {
         width: 100%;
         height: var(--px-512);
