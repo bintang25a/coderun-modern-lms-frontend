@@ -17,17 +17,29 @@ const ManageDataField = ({
   const [formData, setFormData] = useState(item);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, files } = e.target;
+
+    if (type === "file") {
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async () => {
-    console.log(formData);
     loadingSetting(true);
+
+    const payload = new FormData();
+    Object.keys(formData).forEach((key) => {
+      if (formData[key] !== null && formData[key] !== undefined) {
+        payload.append(key, formData[key]);
+      }
+    });
+
     try {
-      isEdit
-        ? await onSubmit(item[item_id], formData)
-        : await onSubmit(formData);
+      console.log(payload);
+      console.log(formData);
+      isEdit ? await onSubmit(item[item_id], payload) : await onSubmit(payload);
 
       onClose();
       allertSetting({
@@ -50,7 +62,9 @@ const ManageDataField = ({
   return (
     <div className={`action-form-overlay ${isActive ? "" : "inactive"}`}>
       <div className="action-form">
-        <h2>{isEdit ? `EDIT ${type}` : `ADD ${type}`}</h2>
+        <h2>
+          {isEdit ? `EDIT ${type.toUpperCase()}` : `ADD ${type.toUpperCase()}`}
+        </h2>
 
         <div className="input-container">
           {fields.map((field) => (
@@ -78,9 +92,12 @@ const ManageDataField = ({
                   name={field.name}
                   id={field.name}
                   placeholder={field.placeholder}
+                  {...(field.type !== "file" && {
+                    value: formData[field.name] || "",
+                  })}
                   onChange={handleChange}
-                  value={formData[field.name] || ""}
                   disabled={isEdit && field.disabledOnEdit}
+                  autoComplete="off"
                 />
               )}
             </div>

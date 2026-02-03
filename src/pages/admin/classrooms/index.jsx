@@ -137,7 +137,7 @@ export default function Classrooms() {
     if (isAllSelected) {
       setSelectedIds([]);
     } else {
-      const allIds = currentData.map((item) => item.uid);
+      const allIds = currentData.map((item) => item.class_code);
       setSelectedIds(allIds);
     }
   };
@@ -321,7 +321,11 @@ export default function Classrooms() {
           <thead>
             <tr>
               <th>
-                <input type="checkbox" onChange={handleSelectAll} />
+                <input
+                  type="checkbox"
+                  checked={selectedIds.length === currentData.length}
+                  onChange={handleSelectAll}
+                />
               </th>
               <th>ID</th>
               <th>Name</th>

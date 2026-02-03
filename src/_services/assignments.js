@@ -1,8 +1,8 @@
 import API from "../_api";
 import message from "../_utilities/errorMessage";
 
-export const getAssignments = async () => {
-  const { data: response } = await API.get("/assignments");
+export const getAssignments = async (class_code) => {
+  const { data: response } = await API.get(`/assignments/${class_code}`);
   return response.data;
 };
 
@@ -18,9 +18,9 @@ export const showAssignment = async (assignment_number) => {
   }
 };
 
-export const createAssignment = async (data) => {
+export const createAssignment = async (class_code, data) => {
   try {
-    const response = await API.post("/assignments", data);
+    const response = await API.post(`/assignments/${class_code}`, data);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -28,9 +28,12 @@ export const createAssignment = async (data) => {
   }
 };
 
-export const updateAssignment = async (assignment_number, data) => {
+export const updateAssignment = async (class_code, assignment_number, data) => {
   try {
-    const response = await API.patch(`assignments/${assignment_number}`, data);
+    const response = await API.patch(
+      `assignments/${class_code}/${assignment_number}`,
+      data
+    );
     return response.data;
   } catch (error) {
     console.log(error);
@@ -38,9 +41,11 @@ export const updateAssignment = async (assignment_number, data) => {
   }
 };
 
-export const deleteAssignment = async (assignment_number) => {
+export const deleteAssignment = async (class_code, assignment_number) => {
   try {
-    const response = await API.delete(`assignments/${assignment_number}`);
+    const response = await API.delete(
+      `assignments/${class_code}/${assignment_number}`
+    );
     return response.data;
   } catch (error) {
     console.log(error);

@@ -32,6 +32,7 @@ export default function Users() {
       name: "uid",
       label: "UID",
       placeholder: "22040700020",
+      disabledOnEdit: true,
     },
     {
       name: "name",
@@ -42,21 +43,29 @@ export default function Users() {
       name: "email",
       label: "Email",
       placeholder: "22040700020@student.umj.ac.id",
+      type: "email",
     },
     {
       name: "phone_number",
       label: "Phone Number",
       placeholder: "082111234455",
+      type: "number",
     },
     {
       name: "role",
-      label: "Role (Admin, Asisten, Praktikan)",
-      placeholder: "Praktikan",
+      label: "Role",
+      type: "select",
+      options: [
+        { value: "Admin", label: "Admin" },
+        { value: "Asisten", label: "Asisten" },
+        { value: "Praktikan", label: "Praktikan" },
+      ],
     },
     {
       name: "password",
       label: "Password",
       placeholder: "Make your password",
+      type: "password",
     },
   ];
 
@@ -273,7 +282,11 @@ export default function Users() {
           <thead>
             <tr>
               <th>
-                <input type="checkbox" onChange={handleSelectAll} />
+                <input
+                  type="checkbox"
+                  checked={selectedIds.length === currentData.length}
+                  onChange={handleSelectAll}
+                />
               </th>
               <th>ID</th>
               <th>Name</th>
@@ -349,7 +362,7 @@ export default function Users() {
         </div>
       </div>
 
-      {modal.isActive && modal.mode === "field" ? (
+      {modal.isActive ? (
         <ManageDataField
           isActive={modal?.isActive}
           isEdit={modal?.isEdit}

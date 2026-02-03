@@ -13,250 +13,30 @@ import {
   FaPenToSquare,
   FaSquarePlus,
 } from "react-icons/fa6";
-import { FaPaperPlane, FaUserMinus, FaUserPlus } from "react-icons/fa";
+import { FaUserMinus, FaUserPlus } from "react-icons/fa";
 import { useOutletContext } from "react-router-dom";
-import {
-  createStudent,
-  deleteStudent,
-} from "../../../_services/studentClassroom";
-
-const AddDeleteStudents = (param) => {
-  const {
-    isActive,
-    onClose,
-    isLoading,
-    allertSetting,
-    fetchData,
-    users,
-    class_code,
-    isDelete = false,
-  } = param;
-
-  const [selectedStudents, setSelectedStudents] = useState([]);
-
-  const moveToRight = (uid) => {
-    if (!selectedStudents.includes(uid)) {
-      setSelectedStudents([...selectedStudents, uid]);
-    }
-  };
-
-  const moveToLeft = (uid) => {
-    setSelectedStudents(selectedStudents.filter((id) => id !== uid));
-  };
-
-  const handleSubmit = async () => {
-    if (selectedStudents.length === 0) return alert("Pilih mahasiswa dulu!");
-    isLoading(true);
-    try {
-      const promises = selectedStudents.map((uid) =>
-        !isDelete
-          ? createStudent({ class_code, uid })
-          : deleteStudent(class_code, uid)
-      );
-      await Promise.all(promises);
-
-      onClose();
-      setSelectedStudents([]);
-      allertSetting({
-        isActive: true,
-        message: "Students moved successfully",
-        isSuccess: true,
-      });
-      await fetchData();
-    } catch (error) {
-      allertSetting({
-        isActive: true,
-        message: error.message,
-        isSuccess: false,
-      });
-    } finally {
-      isLoading(false);
-    }
-  };
-
-  const availableUsers = users?.filter(
-    (u) => !selectedStudents.includes(u.uid)
-  );
-  const chosenUsers = users?.filter((u) => selectedStudents.includes(u.uid));
-
-  return (
-    <div className={`action-form-overlay ${isActive ? `` : `inactive`}`}>
-      <div className="action-form wide">
-        <h2>MANAGE STUDENTS</h2>
-        <p>
-          Class: <b>{class_code}</b>
-        </p>
-        <div className="input-container">
-          <div className="input-field">
-            <label>Available Students ({availableUsers?.length})</label>
-            <div className="student-box">
-              {availableUsers?.map((user) => (
-                <div
-                  key={user.uid}
-                  className="student-item"
-                  onClick={() => moveToRight(user.uid)}
-                >
-                  <span>
-                    {user.uid} - {user.name}
-                  </span>
-                  <FaUserPlus className="add-icon" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="input-field">
-            <label>Selected to Class ({chosenUsers?.length})</label>
-            <div className="student-box selected">
-              {chosenUsers?.map((user) => (
-                <div
-                  key={user.uid}
-                  className="student-item"
-                  onClick={() => moveToLeft(user.uid)}
-                >
-                  <span>
-                    {user.uid} - {user.name}
-                  </span>
-                  <FaCircleXmark className="remove-icon" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        <button
-          type="submit"
-          onClick={handleSubmit}
-          disabled={selectedStudents.length === 0}
-        >
-          <FaPaperPlane />
-          Submit Enrollment
-        </button>
-        <FaCircleXmark className="icon-close" onClick={onClose} />
-      </div>
-    </div>
-  );
-};
-
-const AddEditData = (param) => {
-  const {
-    isActive,
-    isLoading,
-    isEdit = false,
-    onClose,
-    allertSetting,
-    fetchData,
-    singleData = {},
-  } = param;
-
-  const initiateForm = {
-    title: "",
-    material: "",
-  };
-  const [formData, setFormData] = useState(
-    !isEdit
-      ? initiateForm
-      : { ...singleData, assistants: singleData.assistants.map((s) => s.uid) }
-  );
-
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-
-    console.log(formData);
-
-    setFormData({
-      ...formData,
-      [name]: [name] == "material" ? files[0] : value,
-    });
-  };
-
-  const handleSubmit = async () => {
-    isLoading(true);
-
-    try {
-      const dataToSend = new FormData();
-
-      dataToSend.append("title", formData.title);
-      dataToSend.append("material", formData.material);
-
-      if (!isEdit) {
-        await createMaterial(dataToSend);
-      } else {
-        await updateMaterial(singleData?.class_code, dataToSend);
-      }
-
-      onClose();
-      setFormData(initiateForm);
-      allertSetting({
-        isActive: true,
-        message: `${isEdit ? "Edit" : "Simpan"} data berhasil`,
-        isSuccess: true,
-      });
-
-      await fetchData();
-    } catch (error) {
-      allertSetting({
-        isActive: true,
-        message: error || "Gagal mengunggah file",
-        isSuccess: false,
-      });
-    } finally {
-      isLoading(false);
-    }
-  };
-
-  return (
-    <div className={`action-form-overlay ${isActive ? `` : `inactive`}`}>
-      <div className="action-form">
-        <h2>{!isEdit ? "ADD DATA" : "EDIT DATA"}</h2>
-
-        <div className="input-container">
-          <div className="input-field">
-            <label htmlFor="title">Title</label>
-            <input
-              type="text"
-              name="title"
-              id="title"
-              placeholder="Queue and Stack"
-              autoComplete="new-email"
-              onChange={handleChange}
-              value={formData?.title}
-              disabled={isEdit}
-              required
-            />
-          </div>
-          <div className="input-field">
-            <label htmlFor="material">Material</label>
-            <input
-              type="file"
-              name="material"
-              id="material"
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-
-        <button type="submit" onClick={handleSubmit}>
-          <FaPaperPlane />
-          Submit
-        </button>
-
-        <FaCircleXmark className="icon-close" onClick={onClose} />
-      </div>
-    </div>
-  );
-};
+import ManageDataField from "../../../components/action/ManageDataField";
 
 export default function Materials() {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
   const [searchTerm, setSearchTerm] = useState("");
-  const [addForm, setAddForm] = useState(false);
-  const [editForm, setEditForm] = useState(false);
-  const [addStudents, setAddStudents] = useState(false);
-  const [deleteStudents, setDeleteStudents] = useState(false);
+  const [modal, setModal] = useState({});
   const [selectedIds, setSelectedIds] = useState([]);
+
+  const fields = [
+    {
+      name: "title",
+      label: "Title",
+      placeholder: "Queue and Stack",
+    },
+    {
+      name: "material",
+      label: "Upload Material",
+      type: "file",
+    },
+  ];
 
   const { switchLoading, setAllertSetting, setConfirmSetting } =
     useOutletContext();
@@ -272,6 +52,41 @@ export default function Materials() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const closeModal = () => {
+    setModal({ ...modal, isActive: false });
+  };
+
+  const toggleModal = (param) => {
+    const {
+      isActive = false,
+      isEdit = false,
+      isDelete = false,
+      type,
+      fields,
+      itemId,
+      itemShow,
+      onAdd,
+      onRemove,
+      onClose = closeModal,
+      onSubmit,
+    } = param;
+
+    setModal({
+      mode: fields?.length > 0 ? "field" : "transfer",
+      isActive,
+      isEdit,
+      isDelete,
+      type,
+      fields,
+      itemId,
+      itemShow,
+      onAdd,
+      onRemove,
+      onClose,
+      onSubmit,
+    });
+  };
 
   const filteredData = data.filter((item) => {
     const columnsToSearch = ["material_number", "title"];
@@ -295,22 +110,6 @@ export default function Materials() {
     setCurrentPage(1);
   };
 
-  const handleAddForm = () => {
-    setAddForm(!addForm);
-  };
-
-  const handleEditForm = () => {
-    setEditForm(!editForm);
-  };
-
-  const handleAddStudents = () => {
-    setAddStudents(!addStudents);
-  };
-
-  const handleDeleteStudents = () => {
-    setDeleteStudents(!deleteStudents);
-  };
-
   const handleSelect = (uid) => {
     setSelectedIds((prev) =>
       prev.includes(uid) ? prev.filter((id) => id !== uid) : [...prev, uid]
@@ -324,7 +123,7 @@ export default function Materials() {
     if (isAllSelected) {
       setSelectedIds([]);
     } else {
-      const allIds = currentData.map((item) => item.uid);
+      const allIds = currentData.map((item) => item.material_number);
       setSelectedIds(allIds);
     }
   };
@@ -385,26 +184,31 @@ export default function Materials() {
         <section className="right">
           <div className="action">
             <button
-              title="Add Students"
-              disabled={selectedIds.length != 1}
-              onClick={handleAddStudents}
+              title="Add data"
+              onClick={() =>
+                toggleModal({
+                  isActive: true,
+                  type: "Material",
+                  itemId: "material_number",
+                  onSubmit: createMaterial,
+                  fields: fields,
+                })
+              }
             >
-              <FaUserPlus className="icon" />
-            </button>
-            <button
-              title="Delete Students"
-              disabled={selectedIds.length != 1}
-              onClick={handleDeleteStudents}
-            >
-              <FaUserMinus className="icon" />
-            </button>
-            <button title="Add data" onClick={handleAddForm}>
               <FaSquarePlus className="icon" />
             </button>
             <button
               title="Edit data"
               disabled={selectedIds.length != 1}
-              onClick={handleEditForm}
+              onClick={() =>
+                toggleModal({
+                  isActive: true,
+                  type: "Material",
+                  itemId: "material_number",
+                  onSubmit: updateMaterial,
+                  fields: fields,
+                })
+              }
             >
               <FaPenToSquare className="icon" />
             </button>
@@ -432,7 +236,11 @@ export default function Materials() {
           <thead>
             <tr>
               <th>
-                <input type="checkbox" onChange={handleSelectAll} />
+                <input
+                  type="checkbox"
+                  checked={selectedIds.length === currentData.length}
+                  onChange={handleSelectAll}
+                />
               </th>
               <th>ID</th>
               <th>Assistant</th>
@@ -504,51 +312,22 @@ export default function Materials() {
         </div>
       </div>
 
-      {addStudents ? (
-        <AddDeleteStudents
-          isActive={addStudents}
-          onClose={handleAddStudents}
-          isLoading={switchLoading}
+      {modal.isActive ? (
+        <ManageDataField
+          isActive={modal?.isActive}
+          isEdit={modal?.isEdit}
+          item_id={modal.itemId}
+          type={modal?.type}
+          fields={modal.fields}
+          onClose={modal.onClose}
+          onSubmit={modal.onSubmit}
+          loadingSetting={switchLoading}
           allertSetting={setAllertSetting}
           fetchData={fetchData}
-          class_code={selectedIds[0]}
-        />
-      ) : null}
-
-      {deleteStudents ? (
-        <AddDeleteStudents
-          isActive={deleteStudents}
-          onClose={handleDeleteStudents}
-          isLoading={switchLoading}
-          allertSetting={setAllertSetting}
-          fetchData={fetchData}
-          users={
-            data?.find((item) => item.class_code == selectedIds[0])?.students
-          }
-          class_code={selectedIds[0]}
-          isDelete={true}
-        />
-      ) : null}
-
-      {addForm ? (
-        <AddEditData
-          isActive={addForm}
-          onClose={handleAddForm}
-          isLoading={switchLoading}
-          allertSetting={setAllertSetting}
-          fetchData={fetchData}
-        />
-      ) : null}
-
-      {editForm ? (
-        <AddEditData
-          isActive={editForm}
-          isLoading={switchLoading}
-          isEdit={true}
-          onClose={handleEditForm}
-          allertSetting={setAllertSetting}
-          fetchData={fetchData}
-          singleData={data?.find((item) => item.class_code == selectedIds[0])}
+          item={{
+            ...data?.find((item) => item.material_number == selectedIds[0]),
+            password: "",
+          }}
         />
       ) : null}
     </main>

@@ -18,6 +18,15 @@ export default function App() {
         <Route path="login" element={<Login />} />
 
         <Route
+          path="/"
+          element={
+            <ProtectedRole>
+              <Login />
+            </ProtectedRole>
+          }
+        />
+
+        <Route
           element={
             <ProtectedRole allowedRoles={["Praktikan", "Asisten", "Admin"]} />
           }

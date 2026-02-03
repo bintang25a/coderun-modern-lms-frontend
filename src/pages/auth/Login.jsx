@@ -16,13 +16,12 @@ import Alert from "../../components/screen/Alert";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isAlert, setIsAlert] = useState(false);
-  const [errorData, setErrorData] = useState("");
+  const [allertSetting, setAllertSetting] = useState({});
   const [showPass, setShowPass] = useState(false);
   const [formData, setFormData] = useState({
     uid: "",
     password: "",
-    role: "Asisten",
+    role: "Praktikan",
   });
 
   const navigate = useNavigate();
@@ -53,7 +52,7 @@ export default function Login() {
   };
 
   const alertClose = () => {
-    setIsAlert(false);
+    setAllertSetting({ ...allertSetting, isActive: false });
   };
 
   const handleSubmit = async () => {
@@ -74,8 +73,11 @@ export default function Login() {
         navigate(path, { replace: true });
       }, 500);
     } catch (error) {
-      setErrorData(error);
-      setIsAlert(true);
+      setAllertSetting({
+        isActive: true,
+        message: error,
+        isSuccess: false,
+      });
 
       console.log(error);
     } finally {
@@ -210,7 +212,7 @@ export default function Login() {
       </div>
 
       <Loading isActive={isLoading} />
-      <Alert isActive={isAlert} message={errorData} onClose={alertClose} />
+      <Alert alertSetting={allertSetting} onClose={alertClose} />
     </main>
   );
 }
