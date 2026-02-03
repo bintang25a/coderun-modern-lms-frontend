@@ -8,19 +8,23 @@ const Confirm = ({ confirmSetting }) => {
   if (!isActive) return null;
 
   return (
-    <div className="confirm-overlay">
-      <div className="box">
-        <h3 className="title">{title}</h3>
-        <div className="message">{message}</div>
+    <div className="overlay__screen-component">
+      <div className="box__screen-component">
+        <h3 className="title__screen-component">{title}</h3>
+        <div className="message__screen-component">{message}</div>
 
-        <div className="actions">
-          <button title="Cancel" className="button-cancel" onClick={onCancel}>
+        <div className="actions__screen-component">
+          <button
+            title="Cancel"
+            className="button-danger__screen-component"
+            onClick={onCancel}
+          >
             <FaTimes />
             No
           </button>
           <button
             title="Confirm"
-            className="button-confirm"
+            className="button-save__screen-component"
             onClick={onConfirm}
           >
             <FaCheck />

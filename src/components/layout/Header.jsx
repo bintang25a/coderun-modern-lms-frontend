@@ -1,25 +1,30 @@
 import { Link } from "react-router-dom";
-import { FaHome, FaUser, FaRedo, FaSignOutAlt } from "react-icons/fa";
+import {
+  FaHouse,
+  FaUser,
+  FaRotateRight,
+  FaRightFromBracket,
+} from "react-icons/fa6";
 
 const Header = ({ user, handleLogout, handleRefresh }) => {
   return (
     <header className="header">
       <section className="left">
         <button className="action-list" title="refresh" onClick={handleRefresh}>
-          <FaRedo className="icon" />
+          <FaRotateRight className="icon" />
         </button>
         <Link
           to={"/student/dashboard"}
           className="action-list"
           title="dashboard"
         >
-          <FaHome className="icon" />
+          <FaHouse className="icon" />
         </Link>
         <Link to={"/profile"} className="action-list" title="profile">
           <FaUser className="icon" />
         </Link>
         <button className="action-list" title="logout" onClick={handleLogout}>
-          <FaSignOutAlt className="icon" />
+          <FaRightFromBracket className="icon" />
         </button>
       </section>
       <section className="right">

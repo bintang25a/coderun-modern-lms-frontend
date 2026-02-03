@@ -1,16 +1,16 @@
 import { Link } from "react-router-dom";
 import {
   FaGraduationCap,
-  FaHome,
+  FaUsersBetweenLines,
   FaChalkboard,
   FaBookOpen,
   FaClipboardList,
   FaUser,
   FaClipboardCheck,
   FaUsers,
-  FaUserFriends,
-} from "react-icons/fa";
-import { FaUsersBetweenLines } from "react-icons/fa6";
+  FaHouse,
+  FaUserGroup,
+} from "react-icons/fa6";
 
 const MainGeneral = () => {
   const fixRole = "student";
@@ -18,7 +18,7 @@ const MainGeneral = () => {
   return (
     <main className="content">
       <Link to={`/${fixRole}`} className="nav-list">
-        <FaHome className="icon" />
+        <FaHouse className="icon" />
         Dashboard
       </Link>
       <Link to={`/${fixRole}/classrooms`} className="nav-list">
@@ -45,7 +45,7 @@ const MainAdmin = () => {
   return (
     <main className="content">
       <Link to={"/admin"} className="nav-list">
-        <FaHome className="icon" />
+        <FaHouse className="icon" />
         Dashboard
       </Link>
       <Link to={"/admin/users"} className="nav-list">
@@ -53,7 +53,7 @@ const MainAdmin = () => {
         Users
       </Link>
       <Link to={"/admin/assistants"} className="nav-list">
-        <FaUserFriends className="icon" />
+        <FaUserGroup className="icon" />
         Assistants
       </Link>
       <Link to={"/admin/students"} className="nav-list">

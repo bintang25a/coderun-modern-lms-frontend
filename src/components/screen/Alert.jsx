@@ -17,11 +17,13 @@ const Alert = ({ alertSetting, onClose }) => {
   };
 
   return (
-    <div className="alert-overlay">
-      <div className="box">
-        <div className="message">{parseMessage(message)}</div>
+    <div className="overlay__screen-component">
+      <div className="box__screen-component">
+        <div className="message__screen-component">{parseMessage(message)}</div>
         <button
-          className={`button ${isSuccess ? "save" : "danger"}`}
+          className={`button-${
+            isSuccess ? "save" : "danger"
+          }__screen-component`}
           onClick={onClose}
           title="Confirm"
         >

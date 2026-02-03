@@ -16,300 +16,49 @@ import {
 } from "react-icons/fa6";
 import { FaFileUpload, FaPaperPlane } from "react-icons/fa";
 import { useOutletContext } from "react-router-dom";
-
-const AddFile = (param) => {
-  const { isActive, onClose, isLoading, allertSetting, fetchData } = param;
-
-  const [csvData, setCsvData] = useState([]);
-
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    isLoading(true);
-
-    Papa.parse(file, {
-      complete: (results) => {
-        const filteredData = results.data.filter(
-          (row) => row.length >= 2 && row[0] !== ""
-        );
-
-        const formattedData = filteredData.map((row) => ({
-          uid: row[0].toString().trim(),
-          name: row[1].toString().trim(),
-          email: `${row[0].toString().trim()}@student.umj.ac.id`,
-          phone_number: "0821",
-          role: "Praktikan",
-          password: row[0].toString().trim(),
-        }));
-
-        setCsvData(formattedData);
-        isLoading(false);
-
-        allertSetting({
-          isActive: true,
-          message: `${formattedData.length} data siap diimport`,
-          isSuccess: true,
-        });
-      },
-      error: (error) => {
-        console.error(error);
-        isLoading(false);
-      },
-    });
-  };
-
-  const handleSubmitCsv = async () => {
-    if (csvData.length === 0) return;
-    isLoading(true);
-
-    try {
-      const promises = csvData.map((item) => createUser(JSON.stringify(item)));
-      await Promise.all(promises);
-
-      onClose();
-      setCsvData([]);
-
-      allertSetting({
-        isActive: true,
-        message: "Bulk upload success!",
-        isSuccess: true,
-      });
-
-      await fetchData();
-    } catch (error) {
-      allertSetting({
-        isActive: true,
-        message: `Failed to upload CSV data. ${error}`,
-        isSuccess: false,
-      });
-    } finally {
-      isLoading(false);
-    }
-  };
-
-  return (
-    <div className={`action-form-overlay ${isActive ? `` : `inactive`}`}>
-      <div className="action-form">
-        <h2>UPLOAD CSV DATA</h2>
-
-        <div className="input-container">
-          <div className="input-field file">
-            <p>
-              Format CSV: <br /> column 1:<b> UID</b>, column 2: <b>Name</b>
-            </p>
-          </div>
-          <div className="input-field file">
-            <label htmlFor="csv-upload" className="file">
-              <FaFileUpload /> Choose CSV file
-            </label>
-            <input
-              id="csv-upload"
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              style={{ display: "none" }}
-            />
-          </div>
-        </div>
-
-        {csvData.length > 0 && (
-          <p className="file-info">
-            Terdeteksi: <b>{csvData.length} Baris</b>
-          </p>
-        )}
-
-        <button
-          type="submit"
-          onClick={handleSubmitCsv}
-          disabled={csvData.length === 0}
-          className={csvData.length > 0 ? "active" : ""}
-        >
-          <FaPaperPlane />
-          {csvData.length > 0 ? `Upload ${csvData.length} Data` : "Submit"}
-        </button>
-
-        <FaCircleXmark
-          className="icon-close"
-          onClick={() => {
-            setCsvData([]);
-            onClose();
-          }}
-        />
-      </div>
-    </div>
-  );
-};
-
-const AddEditData = (param) => {
-  const {
-    isActive,
-    isLoading,
-    isEdit = false,
-    onClose,
-    allertSetting,
-    fetchData,
-    singleData,
-  } = param;
-
-  const initiateForm = {
-    uid: "",
-    name: "",
-    email: "",
-    phone_number: "",
-    role: "Praktikan",
-    password: "",
-  };
-
-  const [formData, setFormData] = useState(
-    isEdit ? { ...singleData, password: "" } : initiateForm
-  );
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = async () => {
-    isLoading(true);
-
-    try {
-      !isEdit
-        ? await createUser(JSON.stringify(formData))
-        : await updateUser(singleData?.uid, JSON.stringify(formData));
-
-      onClose();
-      setFormData(initiateForm);
-
-      allertSetting({
-        ...allertSetting,
-        isActive: true,
-        message: `${!isEdit ? "Create" : "Update"} data successfully`,
-        isSuccess: true,
-      });
-
-      await fetchData();
-    } catch (error) {
-      allertSetting({
-        ...allertSetting,
-        isActive: true,
-        message: error,
-        isSuccess: false,
-      });
-    } finally {
-      isLoading(false);
-    }
-  };
-
-  return (
-    <div className={`action-form-overlay ${isActive ? `` : `inactive`}`}>
-      <div className="action-form">
-        <h2>{!isEdit ? "ADD DATA" : "EDIT DATA"}</h2>
-
-        <div className="input-container">
-          <div className="input-field">
-            <label htmlFor="uid">UID</label>
-            <input
-              type="text"
-              name="uid"
-              id="uid"
-              placeholder="22040700020"
-              autoComplete="new-email"
-              onChange={handleChange}
-              value={formData?.uid}
-              required
-            />
-          </div>
-          <div className="input-field">
-            <label htmlFor="name">Name</label>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              placeholder="Bintang Al Fizar"
-              onChange={handleChange}
-              value={formData?.name}
-              required
-            />
-          </div>
-          <div className="input-field">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              name="email"
-              id="email"
-              placeholder="bintang@email.com"
-              autoComplete="new-email"
-              onChange={handleChange}
-              value={formData?.email}
-              required
-            />
-          </div>
-          <div className="input-field">
-            <label htmlFor="phone_number">Phone Number</label>
-            <input
-              type="text"
-              name="phone_number"
-              id="phone_number"
-              placeholder="0821325833"
-              autoComplete="new-email"
-              onChange={handleChange}
-              value={formData?.phone_number}
-              required
-            />
-          </div>
-          <div className="input-field">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              placeholder="Make your password"
-              autoComplete="new-password"
-              onChange={handleChange}
-              value={formData?.password}
-              required
-            />
-          </div>
-          <div className="input-field">
-            <label htmlFor="role">Select Role</label>
-            <select
-              name="role"
-              id="role"
-              onChange={handleChange}
-              value={formData?.role}
-            >
-              <option value="Praktikan">Praktikan</option>
-              <option value="Asisten">Asisten</option>
-              <option value="Admin">Admin</option>
-            </select>
-          </div>
-        </div>
-
-        <button type="submit" onClick={handleSubmit}>
-          <FaPaperPlane />
-          Submit
-        </button>
-
-        <FaCircleXmark className="icon-close" onClick={onClose} />
-      </div>
-    </div>
-  );
-};
+import ManageDataField from "../../../components/action/ManageDataField";
 
 export default function Users() {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
   const [searchTerm, setSearchTerm] = useState("");
-  const [addForm, setAddForm] = useState(false);
+  const [modal, setModal] = useState({});
   const [addFile, setAddFile] = useState(false);
-  const [editForm, setEditForm] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
+
+  const fields = [
+    {
+      name: "uid",
+      label: "UID",
+      placeholder: "22040700020",
+    },
+    {
+      name: "name",
+      label: "Full Name",
+      placeholder: "Bintang Al Fizar",
+    },
+    {
+      name: "email",
+      label: "Email",
+      placeholder: "22040700020@student.umj.ac.id",
+    },
+    {
+      name: "phone_number",
+      label: "Phone Number",
+      placeholder: "082111234455",
+    },
+    {
+      name: "role",
+      label: "Role (Admin, Asisten, Praktikan)",
+      placeholder: "Praktikan",
+    },
+    {
+      name: "password",
+      label: "Password",
+      placeholder: "Make your password",
+    },
+  ];
 
   const { switchLoading, setAllertSetting, setConfirmSetting } =
     useOutletContext();
@@ -355,16 +104,43 @@ export default function Users() {
     setCurrentPage(1);
   };
 
-  const handleAddForm = () => {
-    setAddForm(!addForm);
-  };
-
   const handleAddFile = () => {
     setAddFile(!addFile);
   };
 
-  const handleEditForm = () => {
-    setEditForm(!editForm);
+  const closeModal = () => {
+    setModal({ ...modal, isActive: false });
+  };
+
+  const toggleModal = (param) => {
+    const {
+      isActive = false,
+      isEdit = false,
+      isDelete = false,
+      type,
+      fields,
+      itemId,
+      itemShow,
+      onAdd,
+      onRemove,
+      onClose = closeModal,
+      onSubmit,
+    } = param;
+
+    setModal({
+      mode: fields?.length > 0 ? "field" : "transfer",
+      isActive,
+      isEdit,
+      isDelete,
+      type,
+      fields,
+      itemId,
+      itemShow,
+      onAdd,
+      onRemove,
+      onClose,
+      onSubmit,
+    });
   };
 
   const handleSelect = (uid) => {
@@ -443,13 +219,33 @@ export default function Users() {
             <button title="Add data via excel" onClick={handleAddFile}>
               <FaFileUpload className="icon" />
             </button>
-            <button title="Add data" onClick={handleAddForm}>
+            <button
+              title="Add data"
+              onClick={() =>
+                toggleModal({
+                  isActive: true,
+                  type: "User",
+                  itemId: "uid",
+                  onSubmit: createUser,
+                  fields: fields,
+                })
+              }
+            >
               <FaSquarePlus className="icon" />
             </button>
             <button
               title="Edit data"
               disabled={selectedIds.length != 1}
-              onClick={handleEditForm}
+              onClick={() =>
+                toggleModal({
+                  isActive: true,
+                  isEdit: true,
+                  type: "User",
+                  itemId: "uid",
+                  onSubmit: updateUser,
+                  fields: fields,
+                })
+              }
             >
               <FaPenToSquare className="icon" />
             </button>
@@ -553,35 +349,22 @@ export default function Users() {
         </div>
       </div>
 
-      {addFile ? (
-        <AddFile
-          isActive={addFile}
-          onClose={handleAddFile}
-          isLoading={switchLoading}
+      {modal.isActive && modal.mode === "field" ? (
+        <ManageDataField
+          isActive={modal?.isActive}
+          isEdit={modal?.isEdit}
+          item_id={modal.itemId}
+          type={modal?.type}
+          fields={modal.fields}
+          onClose={modal.onClose}
+          onSubmit={modal.onSubmit}
+          loadingSetting={switchLoading}
           allertSetting={setAllertSetting}
           fetchData={fetchData}
-        />
-      ) : null}
-
-      {addForm ? (
-        <AddEditData
-          isActive={addForm}
-          isLoading={switchLoading}
-          onClose={handleAddForm}
-          allertSetting={setAllertSetting}
-          fetchData={fetchData}
-        />
-      ) : null}
-
-      {editForm ? (
-        <AddEditData
-          isActive={editForm}
-          isLoading={switchLoading}
-          isEdit={true}
-          onClose={handleEditForm}
-          allertSetting={setAllertSetting}
-          fetchData={fetchData}
-          singleData={data?.find((item) => item.uid == selectedIds[0])}
+          item={{
+            ...data?.find((item) => item.uid == selectedIds[0]),
+            password: "",
+          }}
         />
       ) : null}
     </main>
