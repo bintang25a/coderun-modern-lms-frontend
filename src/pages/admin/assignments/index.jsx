@@ -343,7 +343,6 @@ export default function Assignments() {
               currentData.map((item) => (
                 <tr
                   key={item.assignment_number}
-                  title={item.name}
                   onClick={() => handleSelect(item.assignment_number)}
                 >
                   <td onClick={() => handleSelect(item.assignment_number)}>
@@ -353,17 +352,23 @@ export default function Assignments() {
                       onChange={() => handleSelect(item.assignment_number)}
                     />
                   </td>
-                  <td>{item?.assignment_number}</td>
-                  <td>{item?.title}</td>
-                  <td>{item?.description}</td>
-                  <td>
+                  <td title={item?.assignment_number}>
+                    {item?.assignment_number}
+                  </td>
+                  <td title={item?.title}>{item?.title}</td>
+                  <td title={item?.description}>{item?.description}</td>
+                  <td title={`${item?.startAt} - ${item?.endAt}`}>
                     {item?.startAt} - {item?.endAt}
                   </td>
                   <td>{item?.overtime ? "true" : "false"}</td>
-                  <td>
+                  <td
+                    title={`${item?.assistant_uid} - ${item?.assistant?.name}`}
+                  >
                     {item?.assistant_uid} - {item?.assistant?.name}
                   </td>
-                  <td>
+                  <td
+                    title={`${item?.classroom?.class_code} - ${item?.classroom?.name}`}
+                  >
                     {item?.classroom?.class_code} - {item?.classroom?.name}
                   </td>
                   <td>{item?.answer_key ? "true" : "false"}</td>
