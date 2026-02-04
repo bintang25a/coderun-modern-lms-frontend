@@ -42,9 +42,11 @@ export default function App() {
           <Route path="student" element={<AssistantLayout />}>
             <Route index element={<main>Haii</main>} />
             <Route path="classrooms" element={<Classrooms />} />
-            <Route path="classrooms/:class_code" element={<Classroom />} />
+            <Route path="classrooms/:id" element={<Classroom />} />
             <Route path="materials" element={<main></main>} />
+            <Route path="materials/:id" element={<main></main>} />
             <Route path="assignments" element={<Assignments />} />
+            <Route path="assignments/:id" element={<Assignments />} />
           </Route>
         </Route>
 

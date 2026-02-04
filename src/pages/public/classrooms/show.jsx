@@ -108,7 +108,7 @@ const StudentList = ({ item }) => {
 export default function Classroom() {
   const { switchLoading, setAllertSetting, state } = useOutletContext();
 
-  const { class_code } = useParams();
+  const { id } = useParams();
 
   const [user, setUser] = useState({});
   const [classroom, setClassroom] = useState([]);
@@ -124,7 +124,7 @@ export default function Classroom() {
 
         const [storageData, classroomData] = await Promise.all([
           showUser(fixUser?.uid),
-          showClassroom(class_code),
+          showClassroom(id),
         ]);
 
         console.log(classroomData);
