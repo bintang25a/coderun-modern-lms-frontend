@@ -237,6 +237,9 @@
           }
         }
       }
+      .input-field__action-component:last-child:nth-child(odd) {
+        grid-column: span 2;
+      }
     }
 
     .input-field.file {
@@ -440,7 +443,7 @@
   padding: var(--px-16);
 
   background-color: var(--white);
-  box-shadow: var(--px-8) var(--px-8 4px var(--gray-200));
+  box-shadow: var(--px-2) var(--px-2) 8px var(--gray-200);
 
   section.left__layout-component {
     display: flex;

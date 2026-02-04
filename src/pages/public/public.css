@@ -1,0 +1,284 @@
+main.__public-page {
+  .navbar__public-page {
+    width: 100%;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: var(--px-8) var(--px-32);
+    border: var(--px-2) solid var(--gray-200);
+    border-radius: var(--px-8);
+
+    background-color: var(--white);
+    color: var(--primary);
+
+    section.left__public-page {
+      .title__public-page {
+        font-size: var(--fs-8);
+        font-weight: 700;
+      }
+      .title__public-page:hover {
+        transform: scale(1.05);
+      }
+    }
+
+    section.right__public-page {
+      max-width: 60%;
+      min-width: 240px;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--px-16);
+
+      position: relative;
+
+      .action__public-page {
+        display: flex;
+        gap: var(--px-8);
+
+        .button__public-page {
+          background-color: transparent;
+          padding: var(--px-4);
+          border-radius: var(--px-8);
+          border: var(--px-2) solid var(--gray-200);
+        }
+        .button__public-page:not(:disabled):hover {
+          transform: scale(1.1);
+          cursor: pointer;
+        }
+        .button__public-page:disabled .icon__public-page {
+          color: var(--gray-200);
+        }
+
+        .icon__public-page {
+          aspect-ratio: 1/1;
+          font-size: var(--fs-8);
+          color: var(--primary);
+        }
+      }
+
+      .input__public-page {
+        flex: 1;
+
+        input {
+          width: calc(var(--px-256) * 1.5);
+          height: 100%;
+
+          font-size: var(--fs-4);
+
+          border: var(--px-2) solid var(--gray-200);
+          border-radius: var(--px-8);
+          padding: var(--px-8) var(--px-12);
+        }
+        input:not(:placeholder-shown) + .icon__public-page {
+          display: none;
+        }
+        input:focus {
+          box-shadow: 0 0 4px var(--primary);
+        }
+
+        .icon__public-page {
+          position: absolute;
+          right: var(--px-16);
+          top: 50%;
+
+          transform: translateY(-50%);
+        }
+      }
+    }
+  }
+
+  .content-container__public-page {
+    flex: 1;
+    min-width: 100%;
+    height: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--px-24);
+
+    overflow: hidden;
+
+    .span-3__public-page {
+      grid-column: span 3;
+    }
+    .span-2__public-page {
+      grid-column: span 2;
+    }
+
+    [class*="content__public-page"] {
+      height: 100%;
+      max-height: 68vh;
+
+      overflow: auto;
+
+      padding: var(--px-32);
+      border: var(--px-2) solid var(--gray-200);
+      border-radius: var(--px-8);
+    }
+    .triple-content__public-page {
+      padding-top: 0;
+    }
+  }
+
+  .single-content__public-page {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--px-256), 1fr));
+    gap: var(--px-32);
+    align-items: start;
+
+    .classroom-card__public-page {
+      aspect-ratio: 3/4;
+      height: auto;
+
+      padding: var(--px-16);
+
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: start;
+      gap: var(--px-16);
+
+      border-radius: var(--px-8);
+      box-shadow: var(--px-2) 0 var(--px-4) var(--primary);
+
+      color: var(--white);
+
+      .header-card__public-page {
+        font-size: var(--fs-6);
+        font-weight: 600;
+      }
+
+      .main-card__public-page {
+        flex: 1;
+        width: 100%;
+
+        padding: var(--px-16) 0;
+        border: var(--px-4) solid var(--gray-50);
+        border-width: var(--px-4) 0;
+
+        font-size: var(--fs-4);
+        font-weight: 500;
+      }
+
+      .footer-card__public-page {
+        width: 100%;
+        text-align: center;
+        font-size: var(--fs-5);
+        font-weight: 500;
+      }
+    }
+    .classroom-card__public-page:hover {
+      cursor: pointer;
+      transform: scale(1.025);
+    }
+    .classroom-card__public-page.color-1 {
+      background-color: var(--btn-danger);
+    }
+    .classroom-card__public-page.color-2 {
+      background-color: var(--btn-save);
+    }
+    .classroom-card__public-page.color-3 {
+      background-color: var(--btn-info);
+    }
+    .classroom-card__public-page.color-4 {
+      background-color: var(--black);
+    }
+    .classroom-card__public-page.color-5 {
+      background-color: var(--primary);
+      box-shadow: var(--px-2) 0 var(--px-4) var(--thirdnary);
+    }
+    .classroom-card__public-page.color-6 {
+      background-color: var(--secondary);
+    }
+    .classroom-card__public-page.color-7 {
+      background-color: var(--thirdnary);
+    }
+    .classroom-card__public-page.color-8 {
+      background-color: var(--btn-warning);
+    }
+    .classroom-card__public-page.color-9 {
+      background-color: var(--gray-500);
+    }
+    .classroom-card__public-page.color-10 {
+      background-color: var(--gray-100);
+      color: var(--black);
+
+      .main-card__public-page {
+        border-color: var(--black);
+      }
+    }
+  }
+
+  .triple-content__public-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--px-12);
+
+    position: relative;
+
+    .title__public-page {
+      font-size: var(--fs-7);
+      font-weight: 700;
+      color: var(--primary);
+      text-align: center;
+
+      border-bottom: var(--px-4) solid var(--secondary);
+      background-color: var(--gray-50);
+      padding-top: var(--px-8);
+
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .assignment-list__public-page {
+      aspect-ratio: 4/1;
+      border: var(--px-2) solid var(--primary);
+      border-radius: var(--px-8);
+      padding: var(--px-12);
+
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      .title-text__public-page {
+        font-size: var(--fs-6);
+        font-weight: 600;
+        color: var(--gray-500);
+        padding-left: var(--px-4);
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .text-container__public-page {
+        color: var(--gray-400);
+
+        font-weight: 400;
+        font-size: var(--fs-4);
+
+        z-index: 1;
+
+        .text-top__public-page {
+          padding-left: var(--px-4);
+          border-bottom: var(--px-2) solid var(--primary);
+
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .text-bottom__public-page {
+          padding-left: var(--px-4);
+        }
+      }
+    }
+    .assignment-list__public-page:hover {
+      box-shadow: 0 0 4px var(--thirdnary);
+      transform: scale(1.025);
+    }
+  }
+}

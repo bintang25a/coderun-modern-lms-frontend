@@ -592,7 +592,7 @@ export default function Classrooms() {
               : modal.type.toLowerCase() === "student"
               ? users.filter(
                   (u) =>
-                    u.role !== "Asisten" &&
+                    u.role !== "Admin" &&
                     !selectedClass?.students?.some((s) => s.uid === u.uid)
                 )
               : materials.filter(

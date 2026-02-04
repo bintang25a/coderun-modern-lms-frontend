@@ -10,34 +10,28 @@ import {
   FaHouse,
 } from "react-icons/fa6";
 
-const MainGeneral = () => {
-  const fixRole = "student";
+const MainGeneral = ({ role }) => {
+  const path = role == "Asisten" ? "assistant" : "student";
 
   return (
     <main className="content__layout-component">
-      <Link to={`/${fixRole}`} className="nav-list__layout-component">
+      <Link to={`/${path}`} className="nav-list__layout-component">
         <FaHouse className="icon__layout-component" />
         Dashboard
       </Link>
-      <Link
-        to={`/${fixRole}/classrooms`}
-        className="nav-list__layout-component"
-      >
+      <Link to={`/${path}/classrooms`} className="nav-list__layout-component">
         <FaChalkboard className="icon__layout-component" />
         Classroom
       </Link>
-      <Link to={`/${fixRole}/materials`} className="nav-list__layout-component">
+      <Link to={`/${path}/materials`} className="nav-list__layout-component">
         <FaBookOpen className="icon__layout-component" />
         Material
       </Link>
-      <Link
-        to={`/${fixRole}/assignments`}
-        className="nav-list__layout-component"
-      >
+      <Link to={`/${path}/assignments`} className="nav-list__layout-component">
         <FaClipboardList className="icon__layout-component" />
         Assignment
       </Link>
-      <Link to={"profile"} className="nav-list__layout-component">
+      <Link to={"../profile"} className="nav-list__layout-component">
         <FaUser className="icon__layout-component" />
         Profile
       </Link>
@@ -88,7 +82,7 @@ const Sidebar = ({ role }) => {
           </h2>
         </div>
       </header>
-      {role === "Admin" ? <MainAdmin /> : <MainGeneral />}
+      {role === "Admin" ? <MainAdmin /> : <MainGeneral role={role} />}
     </aside>
   );
 };

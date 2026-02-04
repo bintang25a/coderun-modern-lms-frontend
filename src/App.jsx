@@ -4,14 +4,20 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import ProtectedRole from "./components/auth/ProtectedRole";
 
 import Login from "./pages/auth/Login";
-import StudentLayout from "./layouts/StudentLayout";
+
 import AdminLayout from "./layouts/AdminLayout";
-import Users from "./pages/admin/users";
-import Classrooms from "./pages/admin/classrooms";
-import Materials from "./pages/admin/materials";
-import Assignments from "./pages/admin/assignments";
-import Submissions from "./pages/admin/submissions";
+import UsersAdmin from "./pages/admin/users";
+import ClassroomsAdmin from "./pages/admin/classrooms";
+import MaterialsAdmin from "./pages/admin/materials";
+import AssignmentsAdmin from "./pages/admin/assignments";
+import SubmissionsAdmin from "./pages/admin/submissions";
+
+import StudentLayout from "./layouts/StudentLayout";
+
 import AssistantLayout from "./layouts/AssistantLayout";
+import Classrooms from "./pages/public/classrooms";
+import Assignments from "./pages/public/assignments";
+import Classroom from "./pages/public/classrooms/show";
 
 export default function App() {
   return (
@@ -22,9 +28,9 @@ export default function App() {
         <Route
           path="/"
           element={
-            <ProtectedRole>
+            <ProtectedRoute>
               <Login />
-            </ProtectedRole>
+            </ProtectedRoute>
           }
         />
 
@@ -33,23 +39,32 @@ export default function App() {
             <ProtectedRole allowedRoles={["Praktikan", "Asisten", "Admin"]} />
           }
         >
-          <Route path="student" element={<StudentLayout />}></Route>
+          <Route path="student" element={<AssistantLayout />}>
+            <Route index element={<main>Haii</main>} />
+            <Route path="classrooms" element={<Classrooms />} />
+            <Route path="classrooms/:class_code" element={<Classroom />} />
+            <Route path="materials" element={<main></main>} />
+            <Route path="assignments" element={<Assignments />} />
+          </Route>
         </Route>
 
         <Route element={<ProtectedRole allowedRoles={["Asisten", "Admin"]} />}>
           <Route path="assistant" element={<AssistantLayout />}>
             <Route index element={<main>Haii</main>} />
+            <Route path="classrooms" element={<Classrooms />} />
+            <Route path="classrooms/:class_code" element={<main></main>} />
+            <Route path="assignments" element={<Assignments />} />
           </Route>
         </Route>
 
         <Route element={<ProtectedRole allowedRoles={["Admin"]} />}>
           <Route path="admin" element={<AdminLayout />}>
             <Route index element={<main>Haii</main>} />
-            <Route path="users" element={<Users />} />
-            <Route path="classrooms" element={<Classrooms />} />
-            <Route path="materials" element={<Materials />} />
-            <Route path="assignments" element={<Assignments />} />
-            <Route path="submissions" element={<Submissions />} />
+            <Route path="users" element={<UsersAdmin />} />
+            <Route path="classrooms" element={<ClassroomsAdmin />} />
+            <Route path="materials" element={<MaterialsAdmin />} />
+            <Route path="assignments" element={<AssignmentsAdmin />} />
+            <Route path="submissions" element={<SubmissionsAdmin />} />
           </Route>
         </Route>
       </Routes>

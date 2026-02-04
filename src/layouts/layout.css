@@ -23,7 +23,7 @@
 
   position: relative;
 
-  main {
+  > main {
     flex: 1;
     width: 100%;
     max-height: 100%;

@@ -8,11 +8,7 @@ import Footer from "../components/layout/Footer";
 import Loading from "../components/screen/Loading";
 import Alert from "../components/screen/Alert";
 import Confirm from "../components/screen/Confirm";
-import { getAssignments } from "../_services/assignments";
-import { getClassrooms } from "../_services/classrooms";
-import { getUsers } from "../_services/users";
-import { getMaterials } from "../_services/materials";
-import { getSubmissions } from "../_services/submissions";
+import { showUser } from "../_services/users";
 
 export default function AssistantLayout() {
   const [user, setUser] = useState({});
@@ -27,6 +23,7 @@ export default function AssistantLayout() {
   const pathParts = location.pathname.split("/").filter(Boolean);
   const userRole = pathParts[0];
   const pageName = pathParts[1];
+  const paramId = pathParts[2];
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
@@ -53,45 +50,28 @@ export default function AssistantLayout() {
   const refreshData = async () => {
     switchLoading(true);
 
-    if (pageName === "assignments") {
-      const [storageData, classroomsData] = await Promise.all([
-        getAssignments(),
-        getClassrooms(),
-      ]);
+    const tempUser = localStorage.getItem("user");
+    const fixUser = tempUser ? JSON.parse(tempUser) : "";
+
+    if ((pageName === "classrooms" || pageName === "assignments") && !paramId) {
+      const [storageData] = await Promise.all([showUser(fixUser?.uid)]);
 
       setState({
         data: storageData,
-        classrooms: classroomsData,
+        classrooms:
+          user?.role === "Asisten"
+            ? storageData?.assists
+            : storageData?.classrooms,
       });
-    } else if (pageName === "classrooms") {
-      const [storageData, usersData, materialsData] = await Promise.all([
-        getClassrooms(),
-        getUsers(),
-        getMaterials(),
-      ]);
+    } else if (paramId) {
+      const [storageData] = await Promise.all([showUser(fixUser?.uid)]);
 
       setState({
         data: storageData,
-        users: usersData,
-        materials: materialsData,
-      });
-    } else if (pageName === "materials") {
-      const [storageData] = await Promise.all([getMaterials()]);
-
-      setState({
-        data: storageData,
-      });
-    } else if (pageName === "submissions") {
-      const [storageData] = await Promise.all([getSubmissions()]);
-
-      setState({
-        data: storageData,
-      });
-    } else if (pageName === "users") {
-      const [storageData] = await Promise.all([getUsers()]);
-
-      setState({
-        data: storageData,
+        classrooms:
+          user?.role === "Asisten"
+            ? storageData?.assists
+            : storageData?.classrooms,
       });
     }
 
