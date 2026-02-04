@@ -135,7 +135,7 @@ export default function Submissions() {
     if (isAllSelected) {
       setSelectedIds([]);
     } else {
-      const allIds = currentData.map((item) => item.assignment_number);
+      const allIds = currentData.map((item) => item.submission_number);
       setSelectedIds(allIds);
     }
   };
@@ -240,21 +240,23 @@ export default function Submissions() {
   };
 
   return (
-    <main className="admin-users">
-      <nav>
-        <section className="left">
-          <h1>Submissions</h1>
+    <main className="__admin-page">
+      <nav className="navbar__admin-page">
+        <section className="left__admin-page">
+          <h1 className="title__admin-page">Submissions</h1>
         </section>
-        <section className="right">
-          <div className="action">
+        <section className="right__admin-page">
+          <div className="action__admin-page">
             <button
+              className="button__admin-page"
               title="Delete data"
               disabled={selectedIds.length < 1}
               onClick={handleDeleteData}
             >
-              <FaEraser className="icon" />
+              <FaEraser className="icon__admin-page" />
             </button>
             <button
+              className="button__admin-page"
               title="View data"
               disabled={selectedIds.length != 1}
               onClick={() =>
@@ -267,21 +269,21 @@ export default function Submissions() {
                 })
               }
             >
-              <FaRegEye className="icon" />
+              <FaRegEye className="icon__admin-page" />
             </button>
           </div>
-          <div className="input">
+          <div className="input__admin-page">
             <input
               type="search"
               placeholder="Search by anything"
               onChange={handleSearch}
               title="Search users"
             />
-            <FaMagnifyingGlass className="icon" />
+            <FaMagnifyingGlass className="icon__admin-page" />
           </div>
         </section>
       </nav>
-      <div className="table-container">
+      <div className="table-container__admin-page">
         <table>
           <thead>
             <tr>
@@ -357,8 +359,9 @@ export default function Submissions() {
           <tfoot></tfoot>
         </table>
 
-        <div className="table-action">
+        <div className="table-action__admin-page">
           <button
+            className="button__admin-page"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
             title="previous page"
@@ -370,7 +373,9 @@ export default function Submissions() {
             <button
               key={i}
               onClick={() => setCurrentPage(i + 1)}
-              className={`page ${currentPage === i + 1 ? "active" : ""}`}
+              className={`button__admin-page page ${
+                currentPage === i + 1 ? "active" : ""
+              }`}
               title={`Page ${i + 1}`}
             >
               {i + 1}
@@ -378,6 +383,7 @@ export default function Submissions() {
           ))}
 
           <button
+            className="button__admin-page"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }

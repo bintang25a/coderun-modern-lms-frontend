@@ -91,10 +91,13 @@ const ManageDataField = ({
         <div className="input-container__action-component">
           {fields.map((field) => (
             <div className="input-field__action-component" key={field.name}>
-              <label htmlFor={field.name}>{field.label}</label>
+              <label className="label__action-component" htmlFor={field.name}>
+                {field.label}
+              </label>
 
               {field.type === "select" ? (
                 <select
+                  className="select__action-component"
                   name={field.name}
                   id={field.name}
                   onChange={handleChange}
@@ -110,6 +113,7 @@ const ManageDataField = ({
                 </select>
               ) : (
                 <input
+                  className="input__action-component"
                   type={field.type || "text"}
                   name={field.name}
                   id={field.name}

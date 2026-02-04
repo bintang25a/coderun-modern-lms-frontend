@@ -74,7 +74,7 @@ const ManageDataTransfer = ({
 
         <div className="input-container__action-component">
           <div className="input-field__action-component">
-            <label>
+            <label className="label__action-component">
               General {type}s ({localGeneral?.length})
             </label>
             <div className="box__action-component">
@@ -94,7 +94,7 @@ const ManageDataTransfer = ({
           </div>
 
           <div className="input-field__action-component">
-            <label>
+            <label className="label__action-component">
               Classroom {type}s ({localClassroom?.length})
             </label>
             <div className="box__action-component">

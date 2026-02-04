@@ -78,13 +78,23 @@ const AddDataCsv = ({
 
         <div className="input-container__action-component">
           <div className="input-field__action-component">
-            <label>Choose CSV file</label>
-            <input type="file" accept=".csv" onChange={handleFileUpload} />
+            <label className="label__action-component">Choose CSV file</label>
+            <input
+              className="input__action-component"
+              type="file"
+              accept=".csv"
+              onChange={handleFileUpload}
+            />
           </div>
 
           <div className="input-field__action-component">
-            <label>Total:</label>
-            <input type="text" disabled value={`${csvData?.length} Rows`} />
+            <label className="label__action-component">Total:</label>
+            <input
+              className="input__action-component"
+              type="text"
+              disabled
+              value={`${csvData?.length} Rows`}
+            />
           </div>
         </div>
 

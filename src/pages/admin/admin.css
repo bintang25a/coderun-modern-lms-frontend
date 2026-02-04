@@ -1,5 +1,5 @@
-.admin-users {
-  nav {
+.__admin-page {
+  .navbar__admin-page {
     width: 100%;
 
     display: flex;
@@ -13,17 +13,17 @@
     background-color: var(--white);
     color: var(--primary);
 
-    section.left {
-      h1 {
+    section.left__admin-page {
+      .title__admin-page {
         font-size: var(--fs-8);
         font-weight: 600;
       }
-      h1:hover {
+      .title__admin-page:hover {
         transform: scale(1.1);
       }
     }
 
-    section.right {
+    section.right__admin-page {
       max-width: 60%;
       min-width: 240px;
 
@@ -35,7 +35,7 @@
       position: relative;
       font-size: var(--fs-5);
 
-      .input {
+      .input__admin-page {
         flex: 1;
 
         input {
@@ -53,7 +53,7 @@
           box-shadow: 0 0 4px var(--primary);
         }
 
-        .icon {
+        .icon__admin-page {
           position: absolute;
           right: var(--px-16);
           top: 50%;
@@ -62,25 +62,25 @@
         }
       }
 
-      .action {
+      .action__admin-page {
         display: flex;
         gap: var(--px-8);
 
-        button {
+        .button__admin-page {
           background-color: transparent;
           padding: var(--px-4);
           border-radius: var(--px-8);
           border: var(--px-2) solid var(--gray-200);
         }
-        button:not(:disabled):hover {
+        .button__admin-page:not(:disabled):hover {
           transform: scale(1.1);
           cursor: pointer;
         }
-        button:disabled .icon {
+        .button__admin-page:disabled .icon__admin-page {
           color: var(--gray-200);
         }
 
-        .icon {
+        .icon__admin-page {
           aspect-ratio: 1/1;
           font-size: var(--fs-6);
           color: var(--primary);
@@ -89,7 +89,7 @@
     }
   }
 
-  .table-container {
+  .table-container__admin-page {
     flex: 1;
     min-width: 100%;
     height: 100%;
@@ -187,7 +187,7 @@
       }
     }
 
-    .table-action {
+    .table-action__admin-page {
       width: 100%;
       height: fit-content;
 
@@ -198,7 +198,7 @@
 
       padding: var(--px-16) var(--px-8);
 
-      button {
+      .button__admin-page {
         height: var(--px-48);
 
         border: var(--px-2) solid var(--primary);
@@ -213,20 +213,20 @@
 
         cursor: pointer;
       }
-      button.page {
+      .button__admin-page.page {
         aspect-ratio: 1/1;
         width: auto;
         padding: var(--px-2);
       }
-      button.page.active {
+      .button__admin-page.page.active {
         background-color: var(--primary);
         color: var(--white);
       }
-      button:disabled {
+      .button__admin-page:disabled {
         border-color: var(--gray-200);
         color: var(--gray-200);
       }
-      button:not(:disabled):hover {
+      .button__admin-page:not(:disabled):hover {
         border-color: var(--secondary);
         background-color: var(--secondary);
         color: var(--white);

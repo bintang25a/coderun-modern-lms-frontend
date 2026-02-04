@@ -11,6 +11,7 @@ import Classrooms from "./pages/admin/classrooms";
 import Materials from "./pages/admin/materials";
 import Assignments from "./pages/admin/assignments";
 import Submissions from "./pages/admin/submissions";
+import AssistantLayout from "./layouts/AssistantLayout";
 
 export default function App() {
   return (
@@ -36,7 +37,9 @@ export default function App() {
         </Route>
 
         <Route element={<ProtectedRole allowedRoles={["Asisten", "Admin"]} />}>
-          <Route path="assistant" element={<StudentLayout />}></Route>
+          <Route path="assistant" element={<AssistantLayout />}>
+            <Route index element={<main>Haii</main>} />
+          </Route>
         </Route>
 
         <Route element={<ProtectedRole allowedRoles={["Admin"]} />}>

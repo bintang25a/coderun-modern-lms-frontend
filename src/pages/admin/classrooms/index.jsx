@@ -316,14 +316,15 @@ export default function Classrooms() {
   ];
 
   return (
-    <main className="admin-users">
-      <nav>
-        <section className="left">
-          <h1>Classrooms</h1>
+    <main className="__admin-page">
+      <nav className="navbar__admin-page">
+        <section className="left__admin-page">
+          <h1 className="title__admin-page">Classrooms</h1>
         </section>
-        <section className="right">
-          <div className="action">
+        <section className="right__admin-page">
+          <div className="action__admin-page">
             <button
+              className="button__admin-page"
               title="Manage Assistants"
               disabled={selectedIds.length != 1}
               onClick={() =>
@@ -338,9 +339,10 @@ export default function Classrooms() {
                 })
               }
             >
-              <FaUserGroup className="icon" />
+              <FaUserGroup className="icon__admin-page" />
             </button>
             <button
+              className="button__admin-page"
               title="Manage Students"
               disabled={selectedIds.length != 1}
               onClick={() =>
@@ -355,9 +357,10 @@ export default function Classrooms() {
                 })
               }
             >
-              <FaUsersBetweenLines className="icon" />
+              <FaUsersBetweenLines className="icon__admin-page" />
             </button>
             <button
+              className="button__admin-page"
               title="Manage Materials"
               disabled={selectedIds.length != 1}
               onClick={() =>
@@ -372,9 +375,10 @@ export default function Classrooms() {
                 })
               }
             >
-              <FaBookOpen className="icon" />
+              <FaBookOpen className="icon__admin-page" />
             </button>
             <button
+              className="button__admin-page"
               title="Add Assignment"
               disabled={selectedIds.length != 1}
               onClick={() =>
@@ -387,9 +391,10 @@ export default function Classrooms() {
                 })
               }
             >
-              <FaClipboardList className="icon" />
+              <FaClipboardList className="icon__admin-page" />
             </button>
             <button
+              className="button__admin-page"
               title="Add data"
               onClick={() =>
                 toggleModal({
@@ -401,9 +406,10 @@ export default function Classrooms() {
                 })
               }
             >
-              <FaSquarePlus className="icon" />
+              <FaSquarePlus className="icon__admin-page" />
             </button>
             <button
+              className="button__admin-page"
               title="Edit data"
               disabled={selectedIds.length != 1}
               onClick={() =>
@@ -417,16 +423,18 @@ export default function Classrooms() {
                 })
               }
             >
-              <FaPenToSquare className="icon" />
+              <FaPenToSquare className="icon__admin-page" />
             </button>
             <button
+              className="button__admin-page"
               title="Delete data"
               disabled={selectedIds.length < 1}
               onClick={handleDeleteData}
             >
-              <FaEraser className="icon" />
+              <FaEraser className="icon__admin-page" />
             </button>
             <button
+              className="button__admin-page"
               title="View data"
               disabled={selectedIds.length != 1}
               onClick={() =>
@@ -439,21 +447,21 @@ export default function Classrooms() {
                 })
               }
             >
-              <FaRegEye className="icon" />
+              <FaRegEye className="icon__admin-page" />
             </button>
           </div>
-          <div className="input">
+          <div className="input__admin-page">
             <input
               type="search"
               placeholder="Search by anything"
               onChange={handleSearch}
               title="Search users"
             />
-            <FaMagnifyingGlass className="icon" />
+            <FaMagnifyingGlass className="icon__admin-page" />
           </div>
         </section>
       </nav>
-      <div className="table-container">
+      <div className="table-container__admin-page">
         <table>
           <thead>
             <tr>
@@ -517,8 +525,9 @@ export default function Classrooms() {
           <tfoot></tfoot>
         </table>
 
-        <div className="table-action">
+        <div className="table-action__admin-page">
           <button
+            className="button__admin-page"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
             title="previous page"
@@ -530,7 +539,9 @@ export default function Classrooms() {
             <button
               key={i}
               onClick={() => setCurrentPage(i + 1)}
-              className={`page ${currentPage === i + 1 ? "active" : ""}`}
+              className={`button__admin-page page ${
+                currentPage === i + 1 ? "active" : ""
+              }`}
               title={`Page ${i + 1}`}
             >
               {i + 1}
@@ -538,6 +549,7 @@ export default function Classrooms() {
           ))}
 
           <button
+            className="button__admin-page"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }

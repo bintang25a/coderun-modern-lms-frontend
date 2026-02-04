@@ -332,14 +332,15 @@ export default function Assignments() {
   };
 
   return (
-    <main className="admin-users">
-      <nav>
-        <section className="left">
-          <h1>Assignments</h1>
+    <main className="__admin-page">
+      <nav className="navbar__admin-page">
+        <section className="left__admin-page">
+          <h1 className="title__admin-page">Assignments</h1>
         </section>
-        <section className="right">
-          <div className="action">
+        <section className="right__admin-page">
+          <div className="action__admin-page">
             <button
+              className="button__admin-page"
               title="Select classroom"
               onClick={() =>
                 toggleModal({
@@ -351,9 +352,10 @@ export default function Assignments() {
                 })
               }
             >
-              <FaChalkboard className="icon" />
+              <FaChalkboard className="icon__admin-page" />
             </button>
             <button
+              className="button__admin-page"
               title="Add data"
               disabled={!selectedClass}
               onClick={() =>
@@ -366,9 +368,10 @@ export default function Assignments() {
                 })
               }
             >
-              <FaSquarePlus className="icon" />
+              <FaSquarePlus className="icon__admin-page" />
             </button>
             <button
+              className="button__admin-page"
               title="Edit data"
               disabled={selectedIds.length != 1}
               onClick={() =>
@@ -382,16 +385,18 @@ export default function Assignments() {
                 })
               }
             >
-              <FaPenToSquare className="icon" />
+              <FaPenToSquare className="icon__admin-page" />
             </button>
             <button
+              className="button__admin-page"
               title="Delete data"
               disabled={selectedIds.length < 1}
               onClick={handleDeleteData}
             >
-              <FaEraser className="icon" />
+              <FaEraser className="icon__admin-page" />
             </button>
             <button
+              className="button__admin-page"
               title="View data"
               disabled={selectedIds.length != 1}
               onClick={() =>
@@ -404,21 +409,21 @@ export default function Assignments() {
                 })
               }
             >
-              <FaRegEye className="icon" />
+              <FaRegEye className="icon__admin-page" />
             </button>
           </div>
-          <div className="input">
+          <div className="input__admin-page">
             <input
               type="search"
               placeholder="Search by anything"
               onChange={handleSearch}
               title="Search users"
             />
-            <FaMagnifyingGlass className="icon" />
+            <FaMagnifyingGlass className="icon__admin-page" />
           </div>
         </section>
       </nav>
-      <div className="table-container">
+      <div className="table-container__admin-page">
         <table>
           <thead>
             <tr>
@@ -490,8 +495,9 @@ export default function Assignments() {
           <tfoot></tfoot>
         </table>
 
-        <div className="table-action">
+        <div className="table-action__admin-page">
           <button
+            className="button__admin-page"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
             title="previous page"
@@ -503,7 +509,9 @@ export default function Assignments() {
             <button
               key={i}
               onClick={() => setCurrentPage(i + 1)}
-              className={`page ${currentPage === i + 1 ? "active" : ""}`}
+              className={`button__admin-page page ${
+                currentPage === i + 1 ? "active" : ""
+              }`}
               title={`Page ${i + 1}`}
             >
               {i + 1}
@@ -511,6 +519,7 @@ export default function Assignments() {
           ))}
 
           <button
+            className="button__admin-page"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
