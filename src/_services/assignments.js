@@ -1,15 +1,15 @@
 import API from "../_api";
 import message from "../_utilities/errorMessage";
 
-export const getAssignments = async (class_code) => {
+export const getAssignments = async (class_code = "admin") => {
   const { data: response } = await API.get(`/assignments/${class_code}`);
   return response.data;
 };
 
-export const showAssignment = async (assignment_number) => {
+export const showAssignment = async (class_code, assignment_number) => {
   try {
     const { data: response } = await API.get(
-      `/assignments/${assignment_number}`
+      `/assignments/${class_code}/${assignment_number}`
     );
     return response.data;
   } catch (error) {

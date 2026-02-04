@@ -6,18 +6,14 @@ import {
   FaRightFromBracket,
 } from "react-icons/fa6";
 
-const Header = ({ user, handleLogout, handleRefresh }) => {
+const Header = ({ user, handleLogout, handleRefresh, role }) => {
   return (
     <header className="header">
       <section className="left">
         <button className="action-list" title="refresh" onClick={handleRefresh}>
           <FaRotateRight className="icon" />
         </button>
-        <Link
-          to={"/student/dashboard"}
-          className="action-list"
-          title="dashboard"
-        >
+        <Link to={`/${role}`} className="action-list" title="dashboard">
           <FaHouse className="icon" />
         </Link>
         <Link to={"/profile"} className="action-list" title="profile">

@@ -10,6 +10,7 @@ import Users from "./pages/admin/users";
 import Classrooms from "./pages/admin/classrooms";
 import Materials from "./pages/admin/materials";
 import Assignments from "./pages/admin/assignments";
+import Submissions from "./pages/admin/submissions";
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
             <Route path="classrooms" element={<Classrooms />} />
             <Route path="materials" element={<Materials />} />
             <Route path="assignments" element={<Assignments />} />
+            <Route path="submissions" element={<Submissions />} />
           </Route>
         </Route>
       </Routes>

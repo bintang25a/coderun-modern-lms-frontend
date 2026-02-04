@@ -1,10 +1,14 @@
 import { useState } from "react";
-import { FaCircleXmark, FaPaperPlane } from "react-icons/fa6";
+import { FaCaretDown, FaCircleXmark, FaPaperPlane } from "react-icons/fa6";
+import "../component.css";
+import { FaChevronCircleDown } from "react-icons/fa";
 
 const ManageDataField = ({
   isActive = false,
   isEdit = false,
+  isView = false,
   type = "",
+  class_code = "",
   item_id = "",
   item = {},
   fields = [],
@@ -14,7 +18,7 @@ const ManageDataField = ({
   allertSetting,
   fetchData,
 }) => {
-  const [formData, setFormData] = useState(item);
+  const [formData, setFormData] = useState(isEdit || isView ? item : {});
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -29,22 +33,31 @@ const ManageDataField = ({
   const handleSubmit = async () => {
     loadingSetting(true);
 
-    const payload = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (formData[key] !== null && formData[key] !== undefined) {
-        payload.append(key, formData[key]);
-      }
-    });
+    const hasFile = Object.values(formData).some(
+      (value) => value instanceof File
+    );
+
+    let payload;
+
+    if (hasFile) {
+      payload = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          payload.append(key, value);
+        }
+      });
+    } else {
+      payload = formData;
+    }
 
     try {
       console.log(payload);
-      console.log(formData);
       isEdit ? await onSubmit(item[item_id], payload) : await onSubmit(payload);
 
       onClose();
       allertSetting({
         isActive: true,
-        message: `${isEdit ? "Update" : "Create"} success`,
+        message: `${isEdit ? "Update" : "Create"} data success`,
         isSuccess: true,
       });
       await fetchData();
@@ -60,15 +73,24 @@ const ManageDataField = ({
   };
 
   return (
-    <div className={`action-form-overlay ${isActive ? "" : "inactive"}`}>
-      <div className="action-form">
-        <h2>
-          {isEdit ? `EDIT ${type.toUpperCase()}` : `ADD ${type.toUpperCase()}`}
+    <div className={`overlay__action-component ${isActive ? "" : "inactive"}`}>
+      <div className="form__action-component">
+        <h2 className="title__action-component">
+          {isView
+            ? `VIEW ${type.toUpperCase()}`
+            : isEdit
+            ? `EDIT ${type.toUpperCase()}`
+            : `ADD ${type.toUpperCase()}`}
         </h2>
+        {class_code ? (
+          <p className="description__action-component">
+            Class: <b>{class_code}</b>
+          </p>
+        ) : null}
 
-        <div className="input-container">
+        <div className="input-container__action-component">
           {fields.map((field) => (
-            <div className="input-field" key={field.name}>
+            <div className="input-field__action-component" key={field.name}>
               <label htmlFor={field.name}>{field.label}</label>
 
               {field.type === "select" ? (
@@ -77,7 +99,7 @@ const ManageDataField = ({
                   id={field.name}
                   onChange={handleChange}
                   value={formData[field.name] || ""}
-                  disabled={isEdit && field.disabledOnEdit}
+                  disabled={(isEdit && field.disabledOnEdit) || isView}
                 >
                   <option value="">Choose {field.label}</option>
                   {field.options?.map((opt) => (
@@ -93,22 +115,47 @@ const ManageDataField = ({
                   id={field.name}
                   placeholder={field.placeholder}
                   {...(field.type !== "file" && {
-                    value: formData[field.name] || "",
+                    value: isView
+                      ? field.type === "date"
+                        ? field?.value?.split("T")[0]
+                        : field?.value
+                      : (field.type === "date"
+                          ? formData[field.name]?.split("T")[0]
+                          : formData[field.name]) || "",
                   })}
                   onChange={handleChange}
-                  disabled={isEdit && field.disabledOnEdit}
-                  autoComplete="off"
+                  disabled={(isEdit && field.disabledOnEdit) || isView}
+                  autoComplete={
+                    field.type == "password" ? "new-password" : "off"
+                  }
                 />
               )}
             </div>
           ))}
         </div>
 
-        <button type="submit" onClick={handleSubmit}>
-          <FaPaperPlane /> Submit
+        <button
+          className="button__action-component"
+          type="submit"
+          onClick={() => {
+            isView ? onClose() : handleSubmit();
+          }}
+        >
+          {isView ? (
+            <>
+              <FaChevronCircleDown /> Exit
+            </>
+          ) : (
+            <>
+              <FaPaperPlane /> Submit
+            </>
+          )}
         </button>
 
-        <FaCircleXmark className="icon-close" onClick={onClose} />
+        <FaCircleXmark
+          className="icon-close__action-component"
+          onClick={onClose}
+        />
       </div>
     </div>
   );

@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { FaCircleXmark, FaUserPlus, FaUserMinus } from "react-icons/fa6";
+import {
+  FaCircleXmark,
+  FaUserPlus,
+  FaUserMinus,
+  FaPaperPlane,
+} from "react-icons/fa6";
 
 const ManageDataTransfer = ({
   isActive = false,
@@ -60,64 +65,67 @@ const ManageDataTransfer = ({
   };
 
   return (
-    <div className={`action-form-overlay ${isActive ? "" : "inactive"}`}>
-      <div className="action-form wide">
-        <h2>MANAGE {type.toUpperCase()}</h2>
-        <p>
+    <div className={`overlay__action-component ${isActive ? "" : "inactive"}`}>
+      <div className="form__action-component">
+        <h2 className="title__action-component">MANAGE {type.toUpperCase()}</h2>
+        <p className="description__action-component">
           Class: <b>{class_code}</b>
         </p>
 
-        <div className="input-container">
-          <div className="input-field">
+        <div className="input-container__action-component">
+          <div className="input-field__action-component">
             <label>
               General {type}s ({localGeneral?.length})
             </label>
-            <div className="student-box selected">
+            <div className="box__action-component">
               {localGeneral?.map((item) => (
                 <div
                   key={item[item_id]}
-                  className="student-item"
+                  className="item__action-component"
                   onClick={() => handleAction(item, "remove")}
                 >
                   <span>
                     {item[item_id]} - {item[item_show]}
                   </span>
-                  <FaUserPlus className="add-icon" />
+                  <FaUserPlus className="add-icon__action-component" />
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="input-field">
+          <div className="input-field__action-component">
             <label>
               Classroom {type}s ({localClassroom?.length})
             </label>
-            <div className="student-box">
+            <div className="box__action-component">
               {localClassroom?.map((item) => (
                 <div
                   key={item[item_id]}
-                  className="student-item"
+                  className="item__action-component"
                   onClick={() => handleAction(item, "add")}
                 >
                   <span>
                     {item[item_id]} - {item[item_show]}
                   </span>
-                  <FaUserMinus className="remove-icon" />
+                  <FaUserMinus className="remove-icon__action-component" />
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div
-          className="modal-footer"
-          style={{ marginTop: "20px", textAlign: "right" }}
+        <button
+          className="button__action-component"
+          type="submit"
+          onClick={handleClose}
         >
-          <button className="btn-close-modal" onClick={handleClose}>
-            Finish & Close
-          </button>
-        </div>
-        <FaCircleXmark className="icon-close" onClick={handleClose} />
+          <FaPaperPlane /> Finish & Close
+        </button>
+
+        <FaCircleXmark
+          className="icon-close__action-component"
+          onClick={handleClose}
+        />
       </div>
     </div>
   );

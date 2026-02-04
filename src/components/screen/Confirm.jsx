@@ -1,4 +1,5 @@
 import { FaCheck, FaTimes } from "react-icons/fa";
+import "../component.css";
 
 const Confirm = ({ confirmSetting }) => {
   if (!confirmSetting) return null;
@@ -8,7 +9,7 @@ const Confirm = ({ confirmSetting }) => {
   if (!isActive) return null;
 
   return (
-    <div className="overlay__screen-component">
+    <div className="overlay__screen-component confirm">
       <div className="box__screen-component">
         <h3 className="title__screen-component">{title}</h3>
         <div className="message__screen-component">{message}</div>

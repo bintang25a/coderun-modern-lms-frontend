@@ -1,25 +1,16 @@
 import { useEffect, useState } from "react";
-import Papa from "papaparse";
 import {
-  createUser,
-  deleteUser,
-  getUsers,
-  updateUser,
-} from "../../../_services/users";
+  getSubmissions,
+  deleteSubmission,
+} from "../../../_services/submissions";
 import "../admin.css";
-import {
-  FaEraser,
-  FaMagnifyingGlass,
-  FaPenToSquare,
-  FaRegEye,
-  FaSquarePlus,
-} from "react-icons/fa6";
-import { FaFileUpload, FaPaperPlane } from "react-icons/fa";
+import { FaEraser, FaMagnifyingGlass, FaRegEye } from "react-icons/fa6";
 import { useOutletContext } from "react-router-dom";
-import ManageDataField from "../../../components/action/ManageDataField";
-import AddDataCsv from "../../../components/action/AddDataCsv";
+import { formatDate } from "../../../_utilities/formatDate";
 
-export default function Users() {
+import ManageDataField from "../../../components/action/ManageDataField";
+
+export default function Submissions() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,7 +32,7 @@ export default function Users() {
       try {
         switchLoading(true);
 
-        const [storageData] = await Promise.all([getUsers()]);
+        const [storageData] = await Promise.all([getSubmissions()]);
 
         setData(storageData);
       } catch (error) {
@@ -65,14 +56,13 @@ export default function Users() {
     setData(state?.data || []);
   }, [state]);
 
-  const filteredData = data.filter((item) => {
+  const filteredData = data?.filter((item) => {
     const columnsToSearch = [
-      "uid",
-      "name",
-      "email",
-      "phone_number",
-      "role",
-      "photo",
+      "submission_number",
+      "grade",
+      "assignment_number",
+      "assistant_uid",
+      "answer",
     ];
 
     return columnsToSearch.some((key) => {
@@ -100,7 +90,7 @@ export default function Users() {
 
   const toggleModal = (param) => {
     const {
-      mode,
+      mode = "field",
       isActive = false,
       isEdit = false,
       isDelete = false,
@@ -145,7 +135,7 @@ export default function Users() {
     if (isAllSelected) {
       setSelectedIds([]);
     } else {
-      const allIds = currentData.map((item) => item.uid);
+      const allIds = currentData.map((item) => item.assignment_number);
       setSelectedIds(allIds);
     }
   };
@@ -173,7 +163,13 @@ export default function Users() {
 
       switchLoading(true);
 
-      const deletePromises = selectedIds.map((id) => deleteUser(id));
+      const deletePromises = selectedIds.map((id) => {
+        const item = data.find((a) => a.submission_number === id);
+        const currentAssignmentNumber = item?.assignment_number;
+
+        return deleteSubmission(currentAssignmentNumber, id);
+      });
+
       await Promise.all(deletePromises);
 
       await refreshData();
@@ -197,54 +193,48 @@ export default function Users() {
     }
   };
 
-  const fields = (id, isView = false) => {
-    const item = currentData.find((item) => item.uid == id);
+  const fields = (id = 0) => {
+    const item = currentData.find((item) => item.submission_number == id);
+
+    if (!item) return [];
 
     return [
       {
-        name: "uid",
-        label: "UID",
-        placeholder: "22040700020",
-        disabledOnEdit: true,
-        value: item?.uid,
+        name: "submission_number",
+        label: "ID",
+        value: item?.submission_number,
       },
       {
-        name: "name",
-        label: "Full Name",
-        placeholder: "Bintang Al Fizar",
-        value: item?.name,
+        name: "assignment_uid",
+        label: "Assignment",
+        value: `${item?.assignment_number} - ${item?.assignment?.title}`,
       },
       {
-        name: "email",
-        label: "Email",
-        placeholder: "22040700020@student.umj.ac.id",
-        type: "email",
-        value: item?.email,
+        name: "student_uid",
+        label: "Student",
+        value: `${item?.student_uid} - ${item?.student?.name}`,
       },
       {
-        name: "phone_number",
-        label: "Phone Number",
-        placeholder: "082111234455",
-        type: "number",
-        value: item?.phone_number,
+        name: "answer",
+        label: "Answer",
+        value: item?.answer,
       },
       {
-        name: "role",
-        label: "Role",
-        type: "select",
-        options: [
-          { value: "Admin", label: "Admin" },
-          { value: "Asisten", label: "Asisten" },
-          { value: "Praktikan", label: "Praktikan" },
-        ],
-        value: item?.role,
+        name: "upload_at",
+        label: "Upload At",
+        value: `${formatDate(item?.createdAt)} - ${formatDate(
+          item?.updatedAt
+        )}`,
       },
       {
-        name: "password",
-        label: "Password",
-        placeholder: "Make your password",
-        type: isView ? "text" : "password",
-        value: item?.password,
+        name: "assistant_uid",
+        label: "Grade by",
+        value: `${item?.assistant_uid || ""} - ${item?.assistant?.name || ""}`,
+      },
+      {
+        name: "grade",
+        label: "Grade",
+        value: item?.grade || 0,
       },
     ];
   };
@@ -253,52 +243,10 @@ export default function Users() {
     <main className="admin-users">
       <nav>
         <section className="left">
-          <h1>Users</h1>
+          <h1>Submissions</h1>
         </section>
         <section className="right">
           <div className="action">
-            <button
-              title="Add data via excel"
-              onClick={() =>
-                toggleModal({
-                  mode: "file",
-                  isActive: true,
-                  onSubmit: createUser,
-                })
-              }
-            >
-              <FaFileUpload className="icon" />
-            </button>
-            <button
-              title="Add data"
-              onClick={() =>
-                toggleModal({
-                  isActive: true,
-                  type: "User",
-                  itemId: "uid",
-                  fields: fields(selectedIds[0]),
-                  onSubmit: createUser,
-                })
-              }
-            >
-              <FaSquarePlus className="icon" />
-            </button>
-            <button
-              title="Edit data"
-              disabled={selectedIds.length != 1}
-              onClick={() =>
-                toggleModal({
-                  isActive: true,
-                  isEdit: true,
-                  type: "User",
-                  itemId: "uid",
-                  onSubmit: updateUser,
-                  fields: fields(selectedIds[0]),
-                })
-              }
-            >
-              <FaPenToSquare className="icon" />
-            </button>
             <button
               title="Delete data"
               disabled={selectedIds.length < 1}
@@ -313,9 +261,9 @@ export default function Users() {
                 toggleModal({
                   isActive: true,
                   isView: true,
-                  type: "User",
-                  itemId: "uid",
-                  fields: fields(selectedIds[0], true),
+                  type: "Assignment",
+                  itemId: "assignment_number",
+                  fields: fields(selectedIds[0]),
                 })
               }
             >
@@ -345,37 +293,64 @@ export default function Users() {
                 />
               </th>
               <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone Number</th>
-              <th>Role</th>
-              <th>Photo</th>
-              <th>Password</th>
+              <th>Assignment</th>
+              <th>Student</th>
+              <th>Answer</th>
+              <th>Upload At</th>
+              <th>Grade by</th>
+              <th>Grade</th>
             </tr>
           </thead>
           <tbody>
-            {data ? (
+            {data.length > 0 ? (
               currentData.map((item) => (
-                <tr key={item.uid} onClick={() => handleSelect(item.uid)}>
-                  <td onClick={() => handleSelect(item.uid)}>
+                <tr
+                  key={item.submission_number}
+                  onClick={() => handleSelect(item.submission_number)}
+                >
+                  <td onClick={() => handleSelect(item.submission_number)}>
                     <input
                       type="checkbox"
-                      checked={selectedIds.includes(item.uid)}
-                      onChange={() => handleSelect(item.uid)}
+                      checked={selectedIds.includes(item.submission_number)}
+                      onChange={() => handleSelect(item.submission_number)}
                     />
                   </td>
-                  <td title={item.uid}>{item?.uid}</td>
-                  <td title={item?.name}>{item?.name}</td>
-                  <td title={item?.email}>{item?.email}</td>
-                  <td title={item?.phone_number}>{item?.phone_number}</td>
-                  <td title={item?.role}>{item?.role}</td>
-                  <td title={item?.photo}>{item?.photo}</td>
-                  <td title={item?.password}>{item?.password}</td>
+                  <td title={item?.submission_number}>
+                    {item?.submission_number}
+                  </td>
+                  <td
+                    title={`${item?.assignment_number} - ${item?.assignment?.title}`}
+                  >
+                    {`${item?.assignment_number} - ${item?.assignment?.title}`}
+                  </td>
+                  <td title={`${item?.student_uid} - ${item?.student?.name}`}>
+                    {`${item?.student_uid} - ${item?.student?.name}`}
+                  </td>
+                  <td title={item?.answer}>{item?.answer}</td>
+                  <td
+                    title={`${formatDate(item?.createdAt)} - ${formatDate(
+                      item?.updatedAt
+                    )}`}
+                  >
+                    {`${formatDate(item?.createdAt)} - ${formatDate(
+                      item?.updatedAt
+                    )}`}
+                  </td>
+                  <td
+                    title={`${item?.assistant_uid || ""} - ${
+                      item?.assistant?.name || ""
+                    }`}
+                  >
+                    {`${item?.assistant_uid || ""} - ${
+                      item?.assistant?.name || ""
+                    }`}
+                  </td>
+                  <td title={item?.grade || 0}>{item?.grade || 0}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={6}>Users not found</td>
+                <td colSpan={8}>Submissions not found</td>
               </tr>
             )}
           </tbody>
@@ -414,7 +389,7 @@ export default function Users() {
         </div>
       </div>
 
-      {modal.isActive && modal.mode !== "file" ? (
+      {modal.isActive && modal.mode === "field" ? (
         <ManageDataField
           isActive={modal?.isActive}
           isEdit={modal?.isEdit}
@@ -427,21 +402,7 @@ export default function Users() {
           loadingSetting={switchLoading}
           allertSetting={setAllertSetting}
           fetchData={refreshData}
-          item={{
-            ...data?.find((item) => item.uid == selectedIds[0]),
-            password: "",
-          }}
-        />
-      ) : null}
-
-      {modal.isActive && modal.mode === "file" ? (
-        <AddDataCsv
-          isActive={modal?.isActive}
-          onClose={modal.onClose}
-          onSubmit={modal.onSubmit}
-          loadingSetting={switchLoading}
-          allertSetting={setAllertSetting}
-          fetchData={refreshData}
+          item={data?.find((item) => item?.submission_number == selectedIds[0])}
         />
       ) : null}
     </main>

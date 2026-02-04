@@ -14,6 +14,8 @@ import {
   FaUsersBetweenLines,
   FaBookOpen,
   FaUserGroup,
+  FaRegEye,
+  FaClipboardList,
 } from "react-icons/fa6";
 import { useOutletContext } from "react-router-dom";
 import { getUsers } from "../../../_services/users";
@@ -33,39 +35,64 @@ import {
 
 import ManageDataTransfer from "../../../components/action/ManageDataTransfer";
 import ManageDataField from "../../../components/action/ManageDataField";
+import { createAssignment } from "../../../_services/assignments";
 
 export default function Classrooms() {
-  const [data, setData] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [materials, setMaterials] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
   const [searchTerm, setSearchTerm] = useState("");
   const [modal, setModal] = useState({});
   const [selectedIds, setSelectedIds] = useState([]);
 
+  const {
+    switchLoading,
+    setAllertSetting,
+    setConfirmSetting,
+    refreshData,
+    state,
+  } = useOutletContext();
+
+  const [data, setData] = useState(state.data || []);
+  const [users, setUsers] = useState(state.users || []);
+  const [materials, setMaterials] = useState(state.materials || []);
   const selectedClass = data.find((c) => c.class_code === selectedIds[0]);
 
-  const { switchLoading, setAllertSetting, setConfirmSetting } =
-    useOutletContext();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        switchLoading(true);
 
-  const fetchData = async () => {
-    switchLoading(true);
-    const [storageData, usersData, materialsData] = await Promise.all([
-      getClassrooms(),
-      getUsers(),
-      getMaterials(),
-    ]);
+        const [storageData, usersData, materialsData] = await Promise.all([
+          getClassrooms(),
+          getUsers(),
+          getMaterials(),
+        ]);
 
-    setData(storageData);
-    setUsers(usersData);
-    setMaterials(materialsData);
-    switchLoading(false);
-  };
+        setData(storageData);
+        setUsers(usersData);
+        setMaterials(materialsData);
+      } catch (error) {
+        console.log("Fetch error:", error);
+
+        setAllertSetting({
+          isActive: true,
+          message: error,
+          isSuccess: false,
+        });
+      } finally {
+        setTimeout(() => switchLoading(false), 100);
+      }
+    };
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    setData(state?.data || []);
+    setUsers(state?.users || []);
+    setMaterials(state?.materials || []);
+  }, [state]);
 
   const filteredData = data.filter((item) => {
     const columnsToSearch = ["class_code", "name"];
@@ -95,9 +122,11 @@ export default function Classrooms() {
 
   const toggleModal = (param) => {
     const {
+      mode = "field",
       isActive = false,
       isEdit = false,
       isDelete = false,
+      isView = false,
       type,
       fields,
       itemId,
@@ -109,10 +138,11 @@ export default function Classrooms() {
     } = param;
 
     setModal({
-      mode: fields?.length > 0 ? "field" : "transfer",
+      mode,
       isActive,
       isEdit,
       isDelete,
+      isView,
       type,
       fields,
       itemId,
@@ -168,7 +198,7 @@ export default function Classrooms() {
       const deletePromises = selectedIds.map((id) => deleteClassroom(id));
       await Promise.all(deletePromises);
 
-      await fetchData();
+      await refreshData();
       setSelectedIds([]);
 
       setAllertSetting({
@@ -189,6 +219,102 @@ export default function Classrooms() {
     }
   };
 
+  const handleAddAssignment = async (formData) => {
+    await createAssignment(selectedIds[0], formData);
+  };
+
+  const fields = (id, isView = false) => {
+    const item = currentData.find((item) => item.class_code === id);
+
+    const actionFields = [
+      {
+        name: "class_code",
+        label: "Class Code",
+        placeholder: "DDP-A1-2025",
+        disabledOnEdit: true,
+        value: item?.class_code,
+      },
+      {
+        name: "name",
+        label: "Class Name",
+        placeholder: "Praktikum DDP",
+        value: item?.name,
+      },
+    ];
+
+    if (!item) return actionFields;
+
+    const viewFields = [
+      ...actionFields,
+      {
+        name: "assistants",
+        label: "Assistants",
+        value: item?.assistants?.map((as) => as.name).join(", ") || "-",
+      },
+      {
+        name: "students",
+        label: "Total Students",
+        value: item?.students?.length || 0,
+      },
+      {
+        name: "materials",
+        label: "Total Materials",
+        value: item?.materials?.length || 0,
+      },
+      {
+        name: "assignments",
+        label: "Total Assignments",
+        value: item?.assignments?.length || 0,
+      },
+    ];
+
+    return isView ? viewFields : actionFields;
+  };
+
+  const assignmentFields = [
+    {
+      name: "title",
+      label: "Title",
+      placeholder: "Tugas Pertemuan 2",
+    },
+    {
+      name: "description",
+      label: "Description",
+      placeholder: "Kerjakan dengan testcase sebagai berikut",
+    },
+    {
+      name: "startAt",
+      label: "Start At",
+      type: "date",
+    },
+    {
+      name: "endAt",
+      label: "End At",
+      type: "date",
+    },
+    {
+      name: "overtime",
+      label: "Allow Overtime",
+      type: "select",
+      options: [
+        {
+          label: "True",
+          value: true,
+        },
+        {
+          label: "False",
+          value: false,
+        },
+      ],
+    },
+    {
+      name: "answer",
+      label: "Answer Key (needed for automatic grading)",
+      placeholder: "Kerjakan dengan testcase sebagai berikut",
+      type: "file",
+    },
+  ];
+
   return (
     <main className="admin-users">
       <nav>
@@ -202,6 +328,7 @@ export default function Classrooms() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  mode: "transfer",
                   isActive: true,
                   type: "assistant",
                   itemId: "uid",
@@ -218,6 +345,7 @@ export default function Classrooms() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  mode: "transfer",
                   isActive: true,
                   type: "student",
                   itemId: "uid",
@@ -234,6 +362,7 @@ export default function Classrooms() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  mode: "transfer",
                   isActive: true,
                   type: "material",
                   itemId: "material_number",
@@ -246,24 +375,28 @@ export default function Classrooms() {
               <FaBookOpen className="icon" />
             </button>
             <button
+              title="Add Assignment"
+              disabled={selectedIds.length != 1}
+              onClick={() =>
+                toggleModal({
+                  isActive: true,
+                  type: "assignment",
+                  itemId: "assignment_number",
+                  fields: assignmentFields,
+                  onSubmit: handleAddAssignment,
+                })
+              }
+            >
+              <FaClipboardList className="icon" />
+            </button>
+            <button
               title="Add data"
               onClick={() =>
                 toggleModal({
                   isActive: true,
                   type: "Student",
                   itemId: "class_code",
-                  fields: [
-                    {
-                      name: "class_code",
-                      label: "Class Code",
-                      placeholder: "DDP-A1-2025",
-                    },
-                    {
-                      name: "name",
-                      label: "Class Name",
-                      placeholder: "Praktikum DDP",
-                    },
-                  ],
+                  fields: fields(selectedIds[0]),
                   onSubmit: createClassroom,
                 })
               }
@@ -279,18 +412,7 @@ export default function Classrooms() {
                   isEdit: true,
                   itemId: "class_code",
                   type: "Student",
-                  fields: [
-                    {
-                      name: "class_code",
-                      label: "Class Code",
-                      placeholder: "DDP-A1-2025",
-                    },
-                    {
-                      name: "name",
-                      label: "Class Name",
-                      placeholder: "Praktikum DDP",
-                    },
-                  ],
+                  fields: fields(selectedIds[0]),
                   onSubmit: updateClassroom,
                 })
               }
@@ -303,6 +425,21 @@ export default function Classrooms() {
               onClick={handleDeleteData}
             >
               <FaEraser className="icon" />
+            </button>
+            <button
+              title="View data"
+              disabled={selectedIds.length != 1}
+              onClick={() =>
+                toggleModal({
+                  isActive: true,
+                  isView: true,
+                  type: "Classroom",
+                  itemId: "uid",
+                  fields: fields(selectedIds[0], true),
+                })
+              }
+            >
+              <FaRegEye className="icon" />
             </button>
           </div>
           <div className="input">
@@ -340,7 +477,6 @@ export default function Classrooms() {
               currentData.map((item) => (
                 <tr
                   key={item.class_code}
-                  title={item.name}
                   onClick={() => handleSelect(item.class_code)}
                 >
                   <td onClick={() => handleSelect(item.class_code)}>
@@ -350,14 +486,26 @@ export default function Classrooms() {
                       onChange={() => handleSelect(item.class_code)}
                     />
                   </td>
-                  <td>{item?.class_code}</td>
-                  <td>{item?.name}</td>
-                  <td>
-                    {item?.assistants?.map((assist) => assist.name).join(", ")}
+                  <td title={item?.class_code}>{item?.class_code}</td>
+                  <td title={item?.name}>{item?.name}</td>
+                  <td
+                    title={item?.assistants
+                      ?.map((assist) => assist.name)
+                      .join(", ")}
+                  >
+                    {item?.assistants
+                      ?.map((assist) => assist.name)
+                      .join(", ") || "-"}
                   </td>
-                  <td>{item?.students?.length}</td>
-                  <td>{item?.materials?.length}</td>
-                  <td>{item?.assignments?.length}</td>
+                  <td title={`${item?.students?.length || 0} Students`}>
+                    {item?.students?.length || 0}
+                  </td>
+                  <td title={`${item?.materials?.length || 0} Materials`}>
+                    {item?.materials?.length || 0}
+                  </td>
+                  <td title={`${item?.assignments?.length || 0} Assignments`}>
+                    {item?.assignments?.length || 0}
+                  </td>
                 </tr>
               ))
             ) : (
@@ -414,7 +562,7 @@ export default function Classrooms() {
           onRemove={modal.onRemove}
           loadingSetting={switchLoading}
           allertSetting={setAllertSetting}
-          fetchData={fetchData}
+          fetchData={refreshData}
           inBoxItems={
             modal.type.toLowerCase() === "assistant"
               ? selectedClass?.assistants || []
@@ -449,14 +597,15 @@ export default function Classrooms() {
         <ManageDataField
           isActive={modal?.isActive}
           isEdit={modal?.isEdit}
-          item_id={modal.itemId}
+          isView={modal?.isView}
+          item_id={modal?.itemId}
           type={modal?.type}
-          fields={modal.fields}
-          onClose={modal.onClose}
-          onSubmit={modal.onSubmit}
+          fields={modal?.fields}
+          onClose={modal?.onClose}
+          onSubmit={modal?.onSubmit}
           loadingSetting={switchLoading}
           allertSetting={setAllertSetting}
-          fetchData={fetchData}
+          fetchData={refreshData}
           item={data?.find((item) => item.class_code == selectedIds[0])}
         />
       ) : null}

@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import {
   FaGraduationCap,
-  FaUsersBetweenLines,
   FaChalkboard,
   FaBookOpen,
   FaClipboardList,
@@ -9,7 +8,6 @@ import {
   FaClipboardCheck,
   FaUsers,
   FaHouse,
-  FaUserGroup,
 } from "react-icons/fa6";
 
 const MainGeneral = () => {
@@ -51,14 +49,6 @@ const MainAdmin = () => {
       <Link to={"/admin/users"} className="nav-list">
         <FaUsers className="icon" />
         Users
-      </Link>
-      <Link to={"/admin/assistants"} className="nav-list">
-        <FaUserGroup className="icon" />
-        Assistants
-      </Link>
-      <Link to={"/admin/students"} className="nav-list">
-        <FaUsersBetweenLines className="icon" />
-        Students
       </Link>
       <Link to={"/admin/classrooms"} className="nav-list">
         <FaChalkboard className="icon" />

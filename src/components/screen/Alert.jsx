@@ -1,5 +1,5 @@
 import { FaCircleCheck, FaCircleExclamation } from "react-icons/fa6";
-import "./screen.css";
+import "../component.css";
 
 const Alert = ({ alertSetting, onClose }) => {
   if (!alertSetting) return null;
@@ -17,7 +17,7 @@ const Alert = ({ alertSetting, onClose }) => {
   };
 
   return (
-    <div className="overlay__screen-component">
+    <div className="overlay__screen-component alert">
       <div className="box__screen-component">
         <div className="message__screen-component">{parseMessage(message)}</div>
         <button
