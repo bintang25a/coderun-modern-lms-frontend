@@ -3,18 +3,13 @@ import "../public.css";
 
 import { showUser } from "../../../_services/users";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useOutletContext } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { formatDate } from "../../../_utilities/formatDate";
 
 const AssignmentList = ({ item }) => {
-  const location = useLocation();
-
-  const pathParts = location.pathname.split("/").filter(Boolean);
-  const userRole = pathParts[0];
-
   return (
     <Link
-      to={`/${userRole}/classrooms/${item?.class_code}/${item?.assignment_number}`}
+      to={`${item?.assignment_number}`}
       className="assignment-list__public-page"
     >
       <h2 title={item?.title} className="title-text__public-page">
@@ -22,10 +17,10 @@ const AssignmentList = ({ item }) => {
       </h2>
       <div className="text-container__public-page">
         <p
-          title={`Class: ${item?.class_code} / Uploaded by: ${item?.assistant_uid}`}
+          title={`Class: ${item?.class_code} / Uploaded by: ${item?.assistant?.name}`}
           className="text-top__public-page"
         >
-          Class: {item?.class_code} / Uploaded by: {item?.assistant_uid}
+          Class: {item?.class_code} / Uploaded by: {item?.assistant?.name}
         </p>
         <p
           title={`Due date: ${formatDate(item?.endAt)}`}

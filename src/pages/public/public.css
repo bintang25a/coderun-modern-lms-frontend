@@ -34,6 +34,23 @@ main.__public-page {
 
       position: relative;
 
+      .title__public-page {
+        width: 100%;
+
+        text-align: right;
+        font-size: var(--fs-5);
+        font-weight: 500;
+        color: var(--gray-400);
+
+        span {
+          color: var(--gray-500);
+          font-weight: 600;
+        }
+      }
+      .title__public-page:hover {
+        transform: scale(1.05);
+      }
+
       .action__public-page {
         display: flex;
         gap: var(--px-8);
@@ -232,6 +249,10 @@ main.__public-page {
       position: sticky;
       top: 0;
       z-index: 2;
+
+      span {
+        font-weight: 500;
+      }
     }
 
     .assignment-list__public-page {
@@ -243,6 +264,8 @@ main.__public-page {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+
+      position: relative;
 
       .title-text__public-page {
         font-size: var(--fs-6);
@@ -275,9 +298,54 @@ main.__public-page {
           padding-left: var(--px-4);
         }
       }
+
+      .sign__public-page {
+        position: absolute;
+        top: var(--px-12);
+        right: var(--px-12);
+
+        aspect-ratio: 1/1;
+        padding: var(--px-4);
+        border: var(--px-2) solid var(--gray-400);
+        border-radius: var(--px-4);
+
+        font-size: var(--fs-6);
+        color: var(--gray-400);
+        text-align: center;
+      }
     }
     .assignment-list__public-page:hover {
       box-shadow: 0 0 4px var(--thirdnary);
+      transform: scale(1.025);
+    }
+    .assignment-list__public-page.submited {
+      border-color: var(--thirdnary);
+      .title-text__public-page,
+      .text-container__public-page {
+        color: var(--thirdnary);
+        .text-top__public-page {
+          border-color: var(--thirdnary);
+        }
+      }
+    }
+
+    .student-list__public-page {
+      border: var(--px-2) solid var(--secondary);
+      border-radius: var(--px-8);
+      padding: var(--px-12);
+
+      .title-text__public-page {
+        font-size: var(--fs-4);
+        font-weight: 500;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        color: var(--secondary);
+      }
+    }
+    .student-list__public-page:hover {
       transform: scale(1.025);
     }
   }
