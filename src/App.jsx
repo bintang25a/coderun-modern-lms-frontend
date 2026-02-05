@@ -18,6 +18,7 @@ import AssistantLayout from "./layouts/AssistantLayout";
 import Classrooms from "./pages/public/classrooms";
 import Assignments from "./pages/public/assignments";
 import Classroom from "./pages/public/classrooms/show";
+import Assignment from "./pages/public/assignments/show";
 
 export default function App() {
   return (
@@ -46,7 +47,7 @@ export default function App() {
             <Route path="materials" element={<main></main>} />
             <Route path="materials/:id" element={<main></main>} />
             <Route path="assignments" element={<Assignments />} />
-            <Route path="assignments/:id" element={<Assignments />} />
+            <Route path="assignments/:id" element={<Assignment />} />
           </Route>
         </Route>
 

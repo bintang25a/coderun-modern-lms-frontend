@@ -349,4 +349,118 @@ main.__public-page {
       transform: scale(1.025);
     }
   }
+
+  .assignment-left-content__public-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+
+    gap: var(--px-8);
+
+    .code-field__public-page {
+      flex: 1;
+      width: 100%;
+
+      border: var(--px-2) solid var(--secondary);
+      border-radius: var(--px-8);
+      padding: var(--px-8);
+
+      font-family: "Courier New", monospace;
+      font-size: var(--fs-6);
+
+      resize: none;
+    }
+
+    .action-field__public-page {
+      width: 100%;
+
+      display: flex;
+      gap: var(--px-16);
+
+      .action-input-field__public-page {
+        display: flex;
+
+        .label__public-page {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: var(--px-8);
+
+          padding: var(--px-8);
+          border: var(--px-2) solid var(--secondary);
+          border-radius: var(--px-8);
+
+          font-size: var(--fs-5);
+          font-weight: 500;
+          color: var(--primary);
+        }
+        .label__public-page:hover {
+          background-color: var(--primary);
+          color: var(--white);
+          transform: scale(1.025);
+          cursor: pointer;
+        }
+        .input__public-page {
+          display: none;
+        }
+      }
+    }
+  }
+  .assignment-right-content__public-page {
+    width: 100%;
+
+    background-color: var(--gray-500);
+    overflow-x: auto;
+
+    display: flex;
+    justify-content: center;
+    align-items: start;
+
+    position: relative;
+
+    .output-field__public-page {
+      width: 100%;
+
+      pre {
+        width: 100%;
+
+        .code__public-page {
+          text-align: left;
+          color: var(--gray-50);
+
+          white-space: pre-wrap;
+          word-break: break-all;
+          font-family: "Courier New", monospace;
+
+          font-size: var(--fs-5);
+        }
+        .code__public-page.fs-small {
+          font-size: var(--fs-4);
+        }
+        .code__public-page.fs-large {
+          font-size: var(--fs-6);
+        }
+      }
+    }
+    .action-field__public-page {
+      width: 85%;
+
+      position: absolute;
+      bottom: var(--px-24);
+
+      .input__public-page {
+        width: 100%;
+
+        font-size: var(--fs-5);
+        padding: var(--px-8);
+
+        border: var(--px-4) solid var(--primary);
+        border-radius: var(--px-12);
+      }
+      .input__public-page:focus {
+        box-shadow: 0 0 4px var(--secondary);
+      }
+    }
+  }
 }

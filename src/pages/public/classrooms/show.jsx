@@ -127,8 +127,6 @@ export default function Classroom() {
           showClassroom(id),
         ]);
 
-        console.log(classroomData);
-
         setUser(storageData);
         setClassroom(classroomData);
       } catch (error) {
