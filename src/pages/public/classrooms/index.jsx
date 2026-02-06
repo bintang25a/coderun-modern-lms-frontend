@@ -8,7 +8,7 @@ import { createStudent } from "../../../_services/studentClassroom";
 import ManageDataField from "../../../components/action/ManageDataField";
 
 export default function Classrooms() {
-  const { switchLoading, setAllertSetting, refreshData, state } =
+  const { switchLoading, setAllertSetting, refreshData, state, userRole } =
     useOutletContext();
 
   const [user, setUser] = useState({});
@@ -136,26 +136,28 @@ export default function Classrooms() {
         </section>
         <section className="right__public-page">
           <div className="action__public-page">
-            <button
-              title="Join Classroom"
-              className="button__public-page"
-              onClick={() =>
-                toggleModal({
-                  isActive: true,
-                  type: "or Join Classroom",
-                  fields: [
-                    {
-                      name: "class_code",
-                      label: "Class Code",
-                      placeholder: "Enter class code to join",
-                    },
-                  ],
-                  onSubmit: handleJoinClassroom,
-                })
-              }
-            >
-              <FaChalkboardUser className="icon__public-page" />
-            </button>
+            {userRole === "student" ? (
+              <button
+                title="Join Classroom"
+                className="button__public-page"
+                onClick={() =>
+                  toggleModal({
+                    isActive: true,
+                    type: "or Join Classroom",
+                    fields: [
+                      {
+                        name: "class_code",
+                        label: "Class Code",
+                        placeholder: "Enter class code to join",
+                      },
+                    ],
+                    onSubmit: handleJoinClassroom,
+                  })
+                }
+              >
+                <FaChalkboardUser className="icon__public-page" />
+              </button>
+            ) : null}
           </div>
           <div className="input__public-page">
             <input
@@ -169,7 +171,7 @@ export default function Classrooms() {
         </section>
       </nav>
       <div className="content-container__public-page">
-        <div className="single-content__public-page span-3__public-page">
+        <div className="classrooms-single-content__public-page span-3__public-page">
           {classrooms
             ? filteredData?.map((c) => {
                 const colorClass = getClassColor(c.class_code);

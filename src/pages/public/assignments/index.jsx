@@ -7,9 +7,16 @@ import { Link, useOutletContext } from "react-router-dom";
 import { formatDate } from "../../../_utilities/formatDate";
 
 const AssignmentList = ({ item }) => {
+  const handleClassCode = () => {
+    const class_code = item?.class_code;
+
+    localStorage.setItem("class_code", class_code);
+  };
+
   return (
     <Link
       to={`${item?.assignment_number}`}
+      onClick={handleClassCode}
       className="assignment-list__public-page"
     >
       <h2 title={item?.title} className="title-text__public-page">
@@ -123,7 +130,7 @@ export default function Assignments() {
         </section>
       </nav>
       <div className="content-container__public-page">
-        <div className="triple-content__public-page">
+        <div className="assignments-triple-content__public-page">
           <h1 className="title__public-page">Unsubmited</h1>
           {assignments.length > 0
             ? filteredData
@@ -138,7 +145,7 @@ export default function Assignments() {
                 ))
             : null}
         </div>
-        <div className="triple-content__public-page">
+        <div className="assignments-triple-content__public-page">
           <h1 className="title__public-page">All Assignment</h1>
           {assignments.length > 0
             ? filteredData
@@ -149,7 +156,7 @@ export default function Assignments() {
                 ))
             : null}
         </div>
-        <div className="triple-content__public-page">
+        <div className="assignments-triple-content__public-page">
           <h1 className="title__public-page">Submited</h1>
           {assignments.length > 0
             ? filteredData

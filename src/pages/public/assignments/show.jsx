@@ -1,48 +1,21 @@
-import { FaFileCode, FaMagnifyingGlass } from "react-icons/fa6";
-import "../public.css";
-
+import { FaArrowRight, FaCode } from "react-icons/fa6";
 import { showUser } from "../../../_services/users";
 import { useEffect, useState } from "react";
 import { Link, useOutletContext, useParams } from "react-router-dom";
-import { formatDate } from "../../../_utilities/formatDate";
 import { showAssignment } from "../../../_services/assignments";
-import { createSubmission } from "../../../_services/submissions";
 import { runCode } from "../../../_services/actions";
-import { CiBaseball } from "react-icons/ci";
+import { formatDate } from "../../../_utilities/formatDate";
 
-const AssignmentList = ({ item }) => {
-  return (
-    <Link
-      to={`${item?.assignment_number}`}
-      className="assignment-list__public-page"
-    >
-      <h2 title={item?.title} className="title-text__public-page">
-        {item?.title}
-      </h2>
-      <div className="text-container__public-page">
-        <p
-          title={`Class: ${item?.class_code} / Uploaded by: ${item?.assistant?.name}`}
-          className="text-top__public-page"
-        >
-          Class: {item?.class_code} / Uploaded by: {item?.assistant?.name}
-        </p>
-        <p
-          title={`Due date: ${formatDate(item?.endAt)}`}
-          className="text-bottom__public-page"
-        >
-          Due date: {formatDate(item?.endAt)}
-        </p>
-      </div>
-    </Link>
-  );
-};
+import "../public.css";
 
 export default function Assignment() {
-  const { switchLoading, setAllertSetting, state } = useOutletContext();
+  const { switchLoading, setAllertSetting, state, userRole } =
+    useOutletContext();
   const { id } = useParams();
 
   const [user, setUser] = useState({});
   const [assignment, setAssignment] = useState([]);
+  const [isSubmit, setIsSubmit] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,12 +26,31 @@ export default function Assignment() {
       try {
         switchLoading(true);
 
+        const class_code = localStorage.getItem("class_code");
+
         const [storageData, assignmentData] = await Promise.all([
           showUser(fixUser?.uid),
-          showAssignment(id),
+          showAssignment(class_code, id),
         ]);
 
-        console.log(assignmentData);
+        const submissions = assignmentData?.submissions || [];
+        const submission = submissions?.find(
+          (s) => s.student_uid === storageData?.uid
+        );
+
+        localStorage.setItem(
+          "assignment_number",
+          assignmentData?.assignment_number
+        );
+        submission
+          ? localStorage.setItem(
+              "submission_number",
+              submission?.submission_number
+            )
+          : null;
+        localStorage.setItem("isSubmit", !!submission);
+
+        setIsSubmit(!!submission);
 
         setUser(storageData);
         setAssignment(assignmentData);
@@ -85,39 +77,17 @@ export default function Assignment() {
     setAssignment(tempAssignments || []);
   }, [state]);
 
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [codeSettings, setCodeSettings] = useState({});
+  const [codeSettings, setCodeSettings] = useState({ timeLimit: 500 });
   const [output, setOutput] = useState("");
 
   const handleChange = (e) => {
-    const { files, name, value } = e.target;
+    const { name, value } = e.target;
 
-    const extensionMap = {
-      c: "c",
-      cpp: "cpp",
-      java: "java",
-      py: "python",
-    };
-
-    if (name === "file") {
-      const file = files[0];
-
-      setSelectedFile(file);
-
-      const extension = file.name.split(".").pop().toLowerCase();
-
-      const detectedLanguage = extensionMap[extension] || "c";
-      console.log(detectedLanguage);
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setCodeSettings({
-          ...codeSettings,
-          code: event.target.result,
-          language: detectedLanguage,
-        });
-      };
-      reader.readAsText(file);
+    if (name === "timeLimit") {
+      setCodeSettings({
+        ...codeSettings,
+        [name]: Number(value),
+      });
     } else {
       setCodeSettings({
         ...codeSettings,
@@ -126,37 +96,21 @@ export default function Assignment() {
     }
   };
 
-  const handleSubmit = async () => {
-    switchLoading(true);
+  const handleRunAnswer = async () => {
+    const extension = assignment?.answer_key?.split(".").pop().toLowerCase();
 
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    try {
-      await createSubmission(assignment?.assignment_number, formData);
-
-      setAllertSetting({
-        isActive: true,
-        message: "Assignment Submited",
-        isSuccess: true,
-      });
-    } catch (error) {
-      setAllertSetting({
-        isActive: true,
-        message: error,
-      });
-    } finally {
-      switchLoading(false);
-    }
-  };
-
-  const handleRunCode = async () => {
-    const formData = {
-      ...codeSettings,
-      timeLimit: 5000,
+    const extensionMap = {
+      c: "c",
+      cpp: "cpp",
+      py: "python",
+      java: "java",
     };
 
-    console.log(formData);
+    const formData = {
+      ...codeSettings,
+      codePath: assignment?.answer_key,
+      language: extensionMap[extension],
+    };
 
     try {
       const response = await runCode(formData);
@@ -172,62 +126,102 @@ export default function Assignment() {
     }
   };
 
+  const handleIsSubmit = () => {
+    localStorage.setItem("isSubmit", isSubmit);
+    localStorage.setItem("assignment_number", assignment?.assignment_number);
+  };
+
   return (
     <main className="__public-page">
       <nav className="navbar__public-page">
         <section className="left__public-page">
-          <h1 className="title__public-page">{assignment?.title}</h1>
+          <h1 className="title__public-page">
+            {assignment?.title}
+            <span className="span__public-page">
+              {isSubmit ? " - [Already Submited]" : ""}
+            </span>
+          </h1>
         </section>
         <section className="right__public-page">
-          <h1 className="title__public-page">
-            ID: {assignment?.assignment_number}
-          </h1>
+          <Link
+            to={`/${userRole}/classrooms/${assignment?.class_code}`}
+            className="title__public-page"
+          >
+            Classrooms:{" "}
+            {`${assignment?.classroom?.name} [${assignment?.class_code}]`}
+          </Link>
         </section>
       </nav>
       <div className="content-container__public-page">
         <div className="assignment-left-content__public-page span-2__public-page">
-          <textarea
-            className="code-field__public-page"
-            name="code"
-            id="code"
-            value={codeSettings?.code}
-            onChange={handleChange}
-            placeholder="Kode akan tampil di sini..."
-          />
-          <div className="action-field__public-page">
-            <div className="action-input-field__public-page">
-              <label className="label__public-page" htmlFor="file">
-                Upload Answer File <FaFileCode />
-              </label>
-              <input
-                className="input__public-page"
-                type="file"
-                name="file"
-                id="file"
-                onChange={handleChange}
-              />
-            </div>
+          <h2
+            className="title__public-page"
+            title={`${assignment?.title} [${assignment?.assignment_number}]`}
+          >{`${assignment?.title} [${assignment?.assignment_number}]`}</h2>
+          <p className="description__public-page">{assignment?.description}</p>
+          <div className="date__public-page">
+            <p className="date-item__public-page">
+              {`Start Date: ${formatDate(assignment?.startAt)}`}
+            </p>
+            <p className="date-item__public-page">
+              {`End Date: ${formatDate(assignment?.endAt)}`}
+            </p>
+          </div>
+          <div className="support-link__public-page">
+            {assignment?.supportLink ? (
+              assignment?.supportLink?.split(" ").map((link, index) => {
+                if (!link) return null;
+
+                return (
+                  <a
+                    key={index}
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Link Support {index + 1}
+                  </a>
+                );
+              })
+            ) : (
+              <a
+                className="support-link-item__public-page"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                No Support link, Good luck :D
+              </a>
+            )}
+          </div>
+          <div className="action__public-page">
+            <button
+              className="action-item__public-page"
+              onClick={handleRunAnswer}
+            >
+              <FaCode className="icon__public-page" />
+              Run Example
+            </button>
             <select
-              name="language"
-              id="language"
-              value={codeSettings?.language}
+              className="action-item__public-page"
+              name="timeLimit"
+              id="timeLimit"
+              value={codeSettings?.timeLimit}
               onChange={handleChange}
             >
-              <option value="">Select Code Language</option>
-              <option value="c">C</option>
-              <option value="cpp">C++</option>
-              <option value="java">Java</option>
-              <option value="python">Python</option>
+              <option value="500">0.5s</option>
+              <option value="1000">1s</option>
+              <option value="2000">2s</option>
+              <option value="5000">5s</option>
+              <option value="10000">10s</option>
             </select>
-            <button className="button__public-page run" onClick={handleRunCode}>
-              Run Code
-            </button>
-            <button
-              className="button__public-page submit"
-              onClick={handleSubmit}
+            <Link
+              to={`/${userRole}/submissions`}
+              className="action-item__public-page"
+              onClick={handleIsSubmit}
             >
-              Submit File
-            </button>
+              <FaArrowRight className="icon__public-page" />
+              {isSubmit ? "Edit Submissions" : "Send Submissions"}
+            </Link>
           </div>
         </div>
         <div className="assignment-right-content__public-page">

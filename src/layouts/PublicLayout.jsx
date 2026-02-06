@@ -10,7 +10,7 @@ import Alert from "../components/screen/Alert";
 import Confirm from "../components/screen/Confirm";
 import { showUser } from "../_services/users";
 
-export default function AssistantLayout() {
+export default function PublicLayout() {
   const [user, setUser] = useState({});
   const [state, setState] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -118,6 +118,7 @@ export default function AssistantLayout() {
             setAllertSetting,
             setConfirmSetting,
             refreshData,
+            userRole,
             state,
           }}
         />

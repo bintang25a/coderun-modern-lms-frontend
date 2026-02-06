@@ -44,12 +44,9 @@ const MaterialList = ({ item }) => {
 };
 
 const AssignmentList = ({ item, uid }) => {
-  const location = useLocation();
+  const { userRole } = useOutletContext();
 
-  const pathParts = location.pathname.split("/").filter(Boolean);
-  const userRole = pathParts[0];
-
-  const submissions = item?.assignments?.submissions || [];
+  const submissions = item?.submissions || [];
   const userSubmission = submissions?.find((s) => s.student_uid === uid);
 
   const isSubmit = !!userSubmission;
@@ -63,7 +60,8 @@ const AssignmentList = ({ item, uid }) => {
       className={`assignment-list__public-page ${isSubmit ? "submited" : ""}`}
     >
       <h2 title={item?.title} className="title-text__public-page">
-        {item?.title}
+        {item?.title}{" "}
+        <span>{isLate ? "- Done (late)" : isSubmit ? "- Done" : ""}</span>
       </h2>
       <div className="text-container__public-page">
         <p
@@ -79,13 +77,23 @@ const AssignmentList = ({ item, uid }) => {
           Due date: {formatDate(item?.endAt)}
         </p>
       </div>
-      <div className="sign__public-page">
-        {isLate ? (
-          <FaClock className="icon__public-page" />
-        ) : isSubmit ? (
-          <FaClipboardCheck className="icon__public-page" />
+      <div
+        className={`sign__public-page ${
+          new Date() > new Date(item?.endAt) && userRole === "student"
+            ? "late"
+            : "access"
+        }`}
+      >
+        {userRole === "student" ? (
+          isLate ? (
+            <FaClock className="icon__public-page late" />
+          ) : isSubmit ? (
+            <FaClipboardCheck className="icon__public-page done" />
+          ) : (
+            <FaClipboard className="icon__public-page" />
+          )
         ) : (
-          <FaClipboard className="icon__public-page" />
+          `${item?.submissions?.length} Students`
         )}
       </div>
     </Link>
@@ -126,6 +134,8 @@ export default function Classroom() {
           showUser(fixUser?.uid),
           showClassroom(id),
         ]);
+
+        localStorage.setItem("class_code", classroomData?.class_code);
 
         setUser(storageData);
         setClassroom(classroomData);
@@ -172,7 +182,7 @@ export default function Classroom() {
         </section>
       </nav>
       <div className="content-container__public-page">
-        <div className="triple-content__public-page">
+        <div className="classrooms-triple-content__public-page">
           <h1 className="title__public-page">
             <span>Materials: </span>
             {classroom?.materials?.length}
@@ -187,7 +197,7 @@ export default function Classroom() {
             </div>
           )}
         </div>
-        <div className="triple-content__public-page">
+        <div className="classrooms-triple-content__public-page">
           <h1 className="title__public-page">
             <span>Assignments: </span>
             {classroom?.assignments?.length}
@@ -206,7 +216,7 @@ export default function Classroom() {
             </div>
           )}
         </div>
-        <div className="triple-content__public-page">
+        <div className="classrooms-triple-content__public-page">
           <h1 className="title__public-page">
             <span>Students: </span>
             {classroom?.students?.length}

@@ -25,16 +25,14 @@ export const validateToken = async () => {
   if (!token) return false;
 
   try {
-    const response = await API.get("/check", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await API.get("/check");
     return response.data.success;
   } catch (error) {
-    console.error("Token tidak valid:", error.response?.data || error.message);
+    console.log("Token tidak valid:", error);
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
     return false;
   }
 };

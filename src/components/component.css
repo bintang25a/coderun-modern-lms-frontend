@@ -325,6 +325,35 @@
 .overlay__action-component.inactive {
   display: none;
 }
+.toolbar__action-component {
+  position: fixed;
+
+  display: flex;
+  align-items: center;
+  gap: var(--px-16);
+
+  width: fit-content;
+  min-width: fit-content;
+
+  padding: var(--px-8);
+
+  background-color: var(--white);
+  border: var(--px-2) solid var(--primary);
+  border-radius: var(--px-8);
+
+  box-shadow: 0 var(--px-4) var(--px-8) rgba(0, 0, 0, 0.2);
+
+  cursor: grab;
+  z-index: 9999;
+
+  user-select: none;
+  touch-action: none;
+
+  transition: none !important;
+}
+.toolbar__action-component:active {
+  cursor: grabbing;
+}
 
 .__sidebar__layout-component {
   flex: 1;

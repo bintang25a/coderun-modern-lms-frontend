@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import ProtectedRole from "./components/auth/ProtectedRole";
@@ -12,15 +12,24 @@ import MaterialsAdmin from "./pages/admin/materials";
 import AssignmentsAdmin from "./pages/admin/assignments";
 import SubmissionsAdmin from "./pages/admin/submissions";
 
-import StudentLayout from "./layouts/StudentLayout";
-
-import AssistantLayout from "./layouts/AssistantLayout";
+import PublicLayout from "./layouts/PublicLayout";
 import Classrooms from "./pages/public/classrooms";
 import Assignments from "./pages/public/assignments";
 import Classroom from "./pages/public/classrooms/show";
 import Assignment from "./pages/public/assignments/show";
+import Submission from "./pages/public/submissions";
+import Profile from "./pages/auth/Profile";
 
 export default function App() {
+  const role = localStorage.getItem("user")?.role;
+
+  const userRole = (role) => {
+    const fixRole =
+      role === "Admin" ? "admin" : role === "Asisten" ? "assistant" : "student";
+
+    return fixRole;
+  };
+
   return (
     <BrowserRouter>
       <Routes>
@@ -30,17 +39,28 @@ export default function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <Login />
+              <Navigate to={`/${userRole(role)}`} replace />
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="profile"
+          element={
+            <ProtectedRoute>
+              <PublicLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Profile />} />
+        </Route>
 
         <Route
           element={
             <ProtectedRole allowedRoles={["Praktikan", "Asisten", "Admin"]} />
           }
         >
-          <Route path="student" element={<AssistantLayout />}>
+          <Route path="student" element={<PublicLayout />}>
             <Route index element={<main>Haii</main>} />
             <Route path="classrooms" element={<Classrooms />} />
             <Route path="classrooms/:id" element={<Classroom />} />
@@ -48,14 +68,15 @@ export default function App() {
             <Route path="materials/:id" element={<main></main>} />
             <Route path="assignments" element={<Assignments />} />
             <Route path="assignments/:id" element={<Assignment />} />
+            <Route path="submissions" element={<Submission />} />
           </Route>
         </Route>
 
         <Route element={<ProtectedRole allowedRoles={["Asisten", "Admin"]} />}>
-          <Route path="assistant" element={<AssistantLayout />}>
+          <Route path="assistant" element={<PublicLayout />}>
             <Route index element={<main>Haii</main>} />
             <Route path="classrooms" element={<Classrooms />} />
-            <Route path="classrooms/:class_code" element={<main></main>} />
+            <Route path="classrooms/:id" element={<Classroom />} />
             <Route path="assignments" element={<Assignments />} />
           </Route>
         </Route>
