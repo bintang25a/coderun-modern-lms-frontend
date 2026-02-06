@@ -19,6 +19,8 @@ import Classroom from "./pages/public/classrooms/show";
 import Assignment from "./pages/public/assignments/show";
 import Submission from "./pages/public/submissions";
 import Profile from "./pages/auth/Profile";
+import AssignmentAsistant from "./pages/public/assignments/AssignmentAsistant";
+import AssignmentsAssistant from "./pages/public/assignments/AssignmentsAsistant";
 
 export default function App() {
   const role = localStorage.getItem("user")?.role;
@@ -76,6 +78,11 @@ export default function App() {
           <Route path="assistant" element={<PublicLayout />}>
             <Route index element={<main>Haii</main>} />
             <Route path="classrooms" element={<Classrooms />} />
+            <Route path="classrooms/materials" element={<main>Haii</main>} />
+            <Route
+              path="classrooms/assignments"
+              element={<AssignmentsAssistant />}
+            />
             <Route path="classrooms/:id" element={<Classroom />} />
             <Route path="assignments" element={<Assignments />} />
           </Route>

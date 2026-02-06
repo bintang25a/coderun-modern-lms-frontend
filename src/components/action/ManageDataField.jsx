@@ -51,7 +51,6 @@ const ManageDataField = ({
     }
 
     try {
-      console.log(payload);
       isEdit ? await onSubmit(item[item_id], payload) : await onSubmit(payload);
 
       onClose();

@@ -9,7 +9,14 @@ import {
 } from "react-router-dom";
 import { showClassroom } from "../../../_services/classrooms";
 import { formatDate } from "../../../_utilities/formatDate";
-import { FaClipboard, FaClipboardCheck, FaClock } from "react-icons/fa6";
+import {
+  FaBookOpen,
+  FaClipboard,
+  FaClipboardCheck,
+  FaClipboardList,
+  FaClock,
+  FaUsersBetweenLines,
+} from "react-icons/fa6";
 
 const MaterialList = ({ item }) => {
   const location = useLocation();
@@ -114,7 +121,8 @@ const StudentList = ({ item }) => {
 };
 
 export default function Classroom() {
-  const { switchLoading, setAllertSetting, state } = useOutletContext();
+  const { switchLoading, setAllertSetting, state, userRole } =
+    useOutletContext();
 
   const { id } = useParams();
 
@@ -174,11 +182,31 @@ export default function Classroom() {
         <section className="left__public-page">
           <h1 className="title__public-page">{classroom?.name}</h1>
         </section>
+
         <section className="right__public-page">
-          <h1 className="title__public-page">
-            Tutor/Asisten:
-            <span> {classroom?.assistants?.map((a) => a?.name).join("/")}</span>
-          </h1>
+          {userRole === "assistant" ? (
+            <div className="action__public-page">
+              <Link
+                to={`/${userRole}/classrooms/materials`}
+                className="button__public-page"
+              >
+                <FaBookOpen /> Materials
+              </Link>
+              <Link
+                to={`/${userRole}/classrooms/assignments`}
+                className="button__public-page"
+              >
+                <FaClipboardList /> Assignments
+              </Link>
+            </div>
+          ) : (
+            <h1 className="title__public-page">
+              Tutor/Asisten:{" "}
+              <span>
+                {classroom?.assistants?.map((a) => a?.name).join("/")}
+              </span>
+            </h1>
+          )}
         </section>
       </nav>
       <div className="content-container__public-page">

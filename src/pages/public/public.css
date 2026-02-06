@@ -59,6 +59,8 @@ main.__public-page {
 
       .action__public-page {
         display: flex;
+        justify-content: center;
+        align-items: center;
         gap: var(--px-8);
 
         .button__public-page {
@@ -66,9 +68,19 @@ main.__public-page {
           padding: var(--px-4);
           border-radius: var(--px-8);
           border: var(--px-2) solid var(--gray-200);
+
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: var(--px-4);
+
+          color: var(--secondary);
+        }
+        .button__public-page:not(:only-child) {
+          padding: var(--px-4) var(--px-16);
         }
         .button__public-page:not(:disabled):hover {
-          transform: scale(1.1);
+          transform: scale(1.025);
           cursor: pointer;
         }
         .button__public-page:disabled .icon__public-page {
@@ -137,7 +149,7 @@ main.__public-page {
 
       overflow: auto;
 
-      padding: var(--px-32);
+      padding: var(--px-16);
       border: var(--px-2) solid var(--gray-200);
       border-radius: var(--px-8);
     }
@@ -245,7 +257,8 @@ main.__public-page {
 
   /* ===== SINGLE CLASSROOM & ALL ASSIGNMENTS STYLE ===== */
   .classrooms-triple-content__public-page,
-  .assignments-triple-content__public-page {
+  .assignments-triple-content__public-page,
+  .assignments-right-content__public-page {
     display: flex;
     flex-direction: column;
     gap: var(--px-12);
@@ -269,6 +282,9 @@ main.__public-page {
       span {
         font-weight: 500;
       }
+    }
+    h2.title__public-page {
+      padding-top: 0px;
     }
 
     .assignment-list__public-page {
@@ -355,6 +371,9 @@ main.__public-page {
         color: var(--btn-save);
       }
     }
+    .assignment-list__public-page.__assignments-assistant {
+      aspect-ratio: 8/1;
+    }
     .assignment-list__public-page:hover {
       box-shadow: 0 0 4px var(--thirdnary);
       transform: scale(1.025);
@@ -394,11 +413,13 @@ main.__public-page {
   }
 
   /* ===== SINGLE ASSIGNMENT STYLE ===== */
-  .assignment-left-content__public-page {
+  .assignment-left-content__public-page,
+  .assignments-left-content__public-page {
     display: flex;
     flex-direction: column;
     gap: var(--px-16);
 
+    /* ===== STUDENT ===== */
     .title__public-page {
       font-size: var(--fs-6);
       font-weight: 500;
@@ -484,6 +505,67 @@ main.__public-page {
         transform: scale(1.025);
         background-color: var(--secondary);
         color: var(--gray-50);
+      }
+    }
+
+    /* ===== ASSISTANT ===== */
+    .title__public-page.input__public-page,
+    .description__public-page.textarea__public-page,
+    .date__public-page .date-item__public-page .input__public-page,
+    .support-link__public-page .input__public-page {
+      background-color: var(--white);
+      border: var(--px-2) solid var(--primary);
+      border-radius: var(--px-8);
+      padding: var(--px-4) var(--px-12);
+
+      resize: none;
+    }
+
+    .date__public-page .date-item__public-page {
+      display: flex;
+      align-items: center;
+      gap: var(--px-16);
+
+      .label__public-page {
+        font-size: var(--fs-5);
+      }
+    }
+
+    .support-link__public-page {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      margin-top: var(--px-16);
+
+      .label__public-page {
+        font-size: var(--fs-4);
+        line-height: 1;
+      }
+    }
+
+    .action__public-page {
+      gap: var(--px-4);
+
+      .action-item__public-page {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+
+        padding: var(--px-8);
+
+        .label__public-page {
+          min-width: var(--px-256);
+          width: fit-content;
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+          gap: var(--px-16);
+        }
+        .input__public-page {
+          display: none;
+        }
       }
     }
   }
