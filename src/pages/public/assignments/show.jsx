@@ -33,6 +33,8 @@ export default function Assignment() {
           showAssignment(class_code, id),
         ]);
 
+        console.log(assignmentData);
+
         const submissions = assignmentData?.submissions || [];
         const submission = submissions?.find(
           (s) => s.student_uid === storageData?.uid
@@ -168,8 +170,8 @@ export default function Assignment() {
             </p>
           </div>
           <div className="support-link__public-page">
-            {assignment?.supportLink ? (
-              assignment?.supportLink?.split(" ").map((link, index) => {
+            {assignment?.support_link ? (
+              assignment?.support_link?.split(" ").map((link, index) => {
                 if (!link) return null;
 
                 return (

@@ -11,6 +11,16 @@ export const runCode = async (data) => {
   }
 };
 
+export const grade = async (data) => {
+  try {
+    const response = await API.post("/grade", data);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw message(error);
+  }
+};
+
 export const updateAssignment = async (class_code, assignment_number, data) => {
   try {
     const response = await API.patch(

@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useLocation, useParams } from "react-router-dom";
 import "./layout.css";
 import { logout } from "../_services/auth";
 import { useEffect, useState } from "react";
@@ -9,6 +9,8 @@ import Loading from "../components/screen/Loading";
 import Alert from "../components/screen/Alert";
 import Confirm from "../components/screen/Confirm";
 import { showUser } from "../_services/users";
+import { showAssignment } from "../_services/assignments";
+import { showSubmission } from "../_services/submissions";
 
 export default function PublicLayout() {
   const [user, setUser] = useState({});
@@ -20,10 +22,13 @@ export default function PublicLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const pathname = location.pathname;
   const pathParts = location.pathname.split("/").filter(Boolean);
   const userRole = pathParts[0];
   const pageName = pathParts[1];
   const paramId = pathParts[2];
+
+  const { id } = useParams();
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
@@ -54,24 +59,33 @@ export default function PublicLayout() {
     const fixUser = tempUser ? JSON.parse(tempUser) : "";
 
     if ((pageName === "classrooms" || pageName === "assignments") && !paramId) {
-      const [storageData] = await Promise.all([showUser(fixUser?.uid)]);
+      const [user] = await Promise.all([showUser(fixUser?.uid)]);
 
       setState({
-        data: storageData,
-        classrooms:
-          user?.role === "Asisten"
-            ? storageData?.assists
-            : storageData?.classrooms,
+        user: user,
+        classrooms: user?.role === "Asisten" ? user?.assists : user?.classrooms,
+      });
+    } else if (pathname.startsWith("/assistant/classrooms/assignments/")) {
+      const class_code = localStorage.getItem("class_code");
+      const assignment_number = localStorage.getItem("assignment_number");
+      const submission_number = localStorage.getItem("submission_number");
+
+      const [assignmentData, submissionData] = await Promise.all([
+        showAssignment(class_code, id),
+        showSubmission(assignment_number, submission_number),
+      ]);
+
+      setState({
+        assignment: assignmentData,
+        submissions: assignmentData?.submissions,
+        submission: submissionData,
       });
     } else if (paramId) {
-      const [storageData] = await Promise.all([showUser(fixUser?.uid)]);
+      const [user] = await Promise.all([showUser(fixUser?.uid)]);
 
       setState({
-        data: storageData,
-        classrooms:
-          user?.role === "Asisten"
-            ? storageData?.assists
-            : storageData?.classrooms,
+        user: user,
+        classrooms: user?.role === "Asisten" ? user?.assists : user?.classrooms,
       });
     }
 

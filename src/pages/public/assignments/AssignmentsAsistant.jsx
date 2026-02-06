@@ -1,62 +1,44 @@
 import { FaFileCode, FaPaperPlane } from "react-icons/fa6";
-import { showUser } from "../../../_services/users";
 import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import { AiOutlineFileAdd, AiOutlineFileSearch } from "react-icons/ai";
 import { createAssignment } from "../../../_services/assignments";
 
 import "../public.css";
-
-const AssignmentList = ({ item }) => {
-  const handleClassCode = () => {
-    const class_code = item?.class_code;
-
-    localStorage.setItem("class_code", class_code);
-  };
-
-  return (
-    <Link
-      to={`${item?.assignment_number}`}
-      onClick={handleClassCode}
-      className="assignment-list__public-page __assignments-assistant"
-    >
-      <h2 title={item?.title} className="title-text__public-page">
-        {item?.title}
-      </h2>
-    </Link>
-  );
-};
+import { showClassroom } from "../../../_services/classrooms";
+import DataList from "../../../components/action/DataList";
+import ItemList from "../../../components/grid-item/ItemList";
 
 export default function AssignmentsAssistant() {
   const { switchLoading, setAllertSetting, refreshData, state, userRole } =
     useOutletContext();
 
-  const [user, setUser] = useState({});
+  const initialForm = {
+    title: "",
+    description: "",
+    startAt: "",
+    endAt: "",
+    overtime: false,
+  };
+
   const [classroom, setClassroom] = useState({});
   const [assignments, setAssignments] = useState([]);
-  const [formData, setFormData] = useState({ overtime: false });
+  const [formData, setFormData] = useState(initialForm);
   const [fileSelected, setFileSelected] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
-      const tempUser = localStorage.getItem("user");
-      const fixUser = tempUser ? JSON.parse(tempUser) : "";
-      user?.uid;
+      const class_code = localStorage.getItem("class_code");
 
       try {
         switchLoading(true);
 
-        const [storageData] = await Promise.all([showUser(fixUser?.uid)]);
+        const [classroomsData] = await Promise.all([showClassroom(class_code)]);
 
-        const class_code = localStorage.getItem("class_code");
-        const tempClassroom = storageData?.assists?.find(
-          (classroom) => classroom?.class_code === class_code
-        );
-        const tempAssignments = tempClassroom?.assignments;
+        const assignmentsData = classroomsData?.assignments;
 
-        setUser(storageData);
-        setClassroom(tempClassroom);
-        setAssignments(tempAssignments);
+        setClassroom(classroomsData);
+        setAssignments(assignmentsData);
       } catch (error) {
         console.log("Fetch error:", error);
 
@@ -74,16 +56,14 @@ export default function AssignmentsAssistant() {
   }, []);
 
   useEffect(() => {
-    const tempuser = state?.data || {};
-    const class_code = localStorage.getItem("class_code");
-    const tempClassroom = tempuser?.assists?.find(
-      (classroom) => classroom?.class_code === class_code
-    );
-    const tempAssignments = tempClassroom?.assignments;
-
-    setUser(tempuser);
-    setClassroom(tempClassroom);
-    setAssignments(tempAssignments);
+    // const tempuser = state?.data || {};
+    // const class_code = localStorage.getItem("class_code");
+    // const tempClassroom = tempuser?.assists?.find(
+    //   (classroom) => classroom?.class_code === class_code
+    // );
+    // const tempAssignments = tempClassroom?.assignments;
+    // setClassroom(tempClassroom);
+    // setAssignments(tempAssignments);
   }, [state]);
 
   const handleChange = (e) => {
@@ -135,7 +115,8 @@ export default function AssignmentsAssistant() {
         isSuccess: true,
       });
 
-      setFormData({ overtime: false });
+      setFormData(initialForm);
+      setFileSelected("");
 
       await refreshData();
     } catch (error) {
@@ -270,14 +251,13 @@ export default function AssignmentsAssistant() {
             </button>
           </div>
         </div>
-        <div className="assignments-right-content__public-page">
-          <h1 className="title__public-page __assignments-assistant">List</h1>
-          {assignments?.length > 0
-            ? assignments?.map((a) => (
-                <AssignmentList key={a.assignment_number} item={a} />
-              ))
-            : null}
-        </div>
+        <ItemList
+          title={"Assignment List"}
+          items={assignments}
+          settings={{ id: "assignment_number", show: "title" }}
+          link={`${userRole}/classrooms/assignments`}
+          disabled={false}
+        />
       </div>
     </main>
   );

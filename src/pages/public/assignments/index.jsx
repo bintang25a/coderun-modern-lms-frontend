@@ -5,8 +5,9 @@ import { showUser } from "../../../_services/users";
 import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import { formatDate } from "../../../_utilities/formatDate";
+import { getAssignments } from "../../../_services/assignments";
 
-const AssignmentList = ({ item }) => {
+const AssignmentList = ({ item, userRole }) => {
   const handleClassCode = () => {
     const class_code = item?.class_code;
 
@@ -15,7 +16,7 @@ const AssignmentList = ({ item }) => {
 
   return (
     <Link
-      to={`${item?.assignment_number}`}
+      to={`/${userRole}/classrooms/assignments/${item?.assignment_number}`}
       onClick={handleClassCode}
       className="assignment-list__public-page"
     >
@@ -41,7 +42,8 @@ const AssignmentList = ({ item }) => {
 };
 
 export default function Assignments() {
-  const { switchLoading, setAllertSetting, state } = useOutletContext();
+  const { switchLoading, setAllertSetting, state, userRole } =
+    useOutletContext();
 
   const [user, setUser] = useState({});
   const [assignments, setAssignments] = useState([]);
@@ -55,17 +57,20 @@ export default function Assignments() {
       try {
         switchLoading(true);
 
-        const [storageData] = await Promise.all([showUser(fixUser?.uid)]);
+        const [userData] = await Promise.all([showUser(fixUser?.uid)]);
 
         const tempClassrooms =
           fixUser?.role === "Asisten"
-            ? storageData?.assists
-            : storageData?.classrooms;
+            ? userData?.assists
+            : userData?.classrooms;
 
-        const tempAssignments = tempClassrooms?.flatMap((c) => c?.assignments);
+        const fetchAssignments =
+          tempClassrooms?.map((c) => getAssignments(c?.class_code)) || [];
 
-        setUser(storageData);
-        setAssignments(tempAssignments);
+        const assignmentsData = await Promise.all(fetchAssignments);
+
+        setUser(userData);
+        setAssignments(assignmentsData?.flat());
       } catch (error) {
         console.log("Fetch error:", error);
 
@@ -102,7 +107,7 @@ export default function Assignments() {
       "assistant_uid",
     ];
 
-    return columnsToSearch.some((key) => {
+    return columnsToSearch?.some((key) => {
       const value = item[key];
 
       if (value === null || value === undefined) return false;
@@ -141,7 +146,11 @@ export default function Assignments() {
                 .sort((a, b) => new Date(a.endAt) - new Date(b.endAt))
                 .slice(0, 10)
                 .map((item) => (
-                  <AssignmentList key={item?.assignment_number} item={item} />
+                  <AssignmentList
+                    key={item?.assignment_number}
+                    item={item}
+                    userRole={userRole}
+                  />
                 ))
             : null}
         </div>
@@ -152,7 +161,11 @@ export default function Assignments() {
                 ?.sort((a, b) => new Date(a.endAt) - new Date(b.endAt))
                 .slice(0, 10)
                 .map((item) => (
-                  <AssignmentList key={item?.assignment_number} item={item} />
+                  <AssignmentList
+                    key={item?.assignment_number}
+                    item={item}
+                    userRole={userRole}
+                  />
                 ))
             : null}
         </div>
@@ -166,7 +179,11 @@ export default function Assignments() {
                 .sort((a, b) => new Date(a.endAt) - new Date(b.endAt))
                 .slice(0, 10)
                 .map((item) => (
-                  <AssignmentList key={item?.assignment_number} item={item} />
+                  <AssignmentList
+                    key={item?.assignment_number}
+                    item={item}
+                    userRole={userRole}
+                  />
                 ))
             : null}
         </div>

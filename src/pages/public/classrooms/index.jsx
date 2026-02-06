@@ -24,14 +24,14 @@ export default function Classrooms() {
       try {
         switchLoading(true);
 
-        const [storageData] = await Promise.all([showUser(fixUser?.uid)]);
-
-        setUser(storageData);
-        setClassrooms(
+        const [userData] = await Promise.all([showUser(fixUser?.uid)]);
+        const classroomsData =
           fixUser?.role === "Asisten"
-            ? storageData?.assists
-            : storageData?.classrooms
-        );
+            ? userData?.assists
+            : userData?.classrooms;
+
+        setUser(userData);
+        setClassrooms(classroomsData);
       } catch (error) {
         console.log("Fetch error:", error);
 
@@ -50,15 +50,8 @@ export default function Classrooms() {
   }, []);
 
   useEffect(() => {
-    const tempUser = localStorage.getItem("user");
-    const fixUser = tempUser ? JSON.parse(tempUser) : "";
-
-    setUser(state?.data);
-    setClassrooms(
-      fixUser?.role === "Asisten"
-        ? state?.data?.assists
-        : state?.data?.classrooms
-    );
+    setUser(state?.user);
+    setClassrooms(state?.classrooms);
   }, [state]);
 
   const getClassColor = (classCode) => {
