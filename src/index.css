@@ -1,6 +1,6 @@
 ::-webkit-scrollbar {
   width: var(--px-8);
-  height: 2px;
+  height: var(--px-4);
 }
 ::-webkit-scrollbar-track {
   background-color: var(--gray-100);

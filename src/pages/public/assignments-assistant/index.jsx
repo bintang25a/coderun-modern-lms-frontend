@@ -1,13 +1,15 @@
-import { FaFileCode, FaPaperPlane } from "react-icons/fa6";
+import {
+  FaBookOpen,
+  FaClipboardList,
+  FaFileCode,
+  FaPaperPlane,
+} from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
-import { AiOutlineFileAdd, AiOutlineFileSearch } from "react-icons/ai";
 import { createAssignment } from "../../../_services/assignments";
-
-import "../public.css";
 import { showClassroom } from "../../../_services/classrooms";
-import DataList from "../../../components/action/DataList";
 import ItemList from "../../../components/grid-item/ItemList";
+import "../public.css";
 
 export default function AssignmentsAssistant() {
   const { switchLoading, setAllertSetting, refreshData, state, userRole } =
@@ -134,15 +136,37 @@ export default function AssignmentsAssistant() {
     <main className="__public-page">
       <nav className="navbar__public-page">
         <section className="left__public-page">
-          <h1 className="title__public-page">Class Assignments</h1>
-        </section>
-        <section className="right__public-page">
           <Link
             to={`/${userRole}/classrooms/${classroom?.class_code}`}
             className="title__public-page"
           >
-            Classrooms: {`${classroom?.name} [${classroom?.class_code}]`}
+            {classroom?.name}
           </Link>
+        </section>
+        <section className="right__public-page">
+          {userRole === "assistant" ? (
+            <div className="action__public-page">
+              <Link
+                to={`/${userRole}/classrooms/materials`}
+                className="button__public-page"
+              >
+                <FaBookOpen /> Materials
+              </Link>
+              <Link
+                to={`/${userRole}/classrooms/assignments`}
+                className="button__public-page active"
+              >
+                <FaClipboardList /> Assignments
+              </Link>
+            </div>
+          ) : (
+            <h1 className="title__public-page">
+              Tutor/Asisten:{" "}
+              <span>
+                {classroom?.assistants?.map((a) => a?.name).join("/")}
+              </span>
+            </h1>
+          )}
         </section>
       </nav>
       <div className="content-container__public-page">
@@ -167,7 +191,7 @@ export default function AssignmentsAssistant() {
           <div className="date__public-page">
             <div className="date-item__public-page">
               <label className="label__public-page" htmlFor="startAt">
-                Start Date
+                Start Date:
               </label>
               <input
                 type="date"
@@ -180,7 +204,7 @@ export default function AssignmentsAssistant() {
             </div>
             <div className="date-item__public-page">
               <label className="label__public-page" htmlFor="endAt">
-                End Date
+                End Date:
               </label>
               <input
                 type="date"
@@ -206,9 +230,9 @@ export default function AssignmentsAssistant() {
               onChange={handleChange}
             />
           </div>
-          <div className="action__public-page">
+          <div className="toolbar__public-page">
             <label
-              className="action-item__public-page label__public-page"
+              className="toolbar-item__public-page label__public-page"
               htmlFor="answer"
             >
               {!fileSelected ? (
@@ -227,7 +251,7 @@ export default function AssignmentsAssistant() {
               />
             </label>
             <button
-              className="action-item__public-page button__public-page"
+              className="toolbar-item__public-page button__public-page"
               onClick={() =>
                 setFormData({
                   ...formData,
@@ -237,20 +261,15 @@ export default function AssignmentsAssistant() {
             >
               Overtime: {formData?.overtime ? "Allowed" : "Disallowed"}
             </button>
-            <button className="action-item__public-page button__public-page">
-              <AiOutlineFileAdd />
-            </button>
-            <button className="action-item__public-page button__public-page">
-              <AiOutlineFileSearch />
-            </button>
             <button
-              className="action-item__public-page button__public-page"
+              className="toolbar-item__public-page button__public-page"
               onClick={handleSubmit}
             >
               <FaPaperPlane /> Submit Assignment
-            </button>
+            </button>{" "}
           </div>
         </div>
+
         <ItemList
           title={"Assignment List"}
           items={assignments}

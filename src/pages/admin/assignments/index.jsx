@@ -19,6 +19,8 @@ import { getClassrooms } from "../../../_services/classrooms";
 import { formatDate } from "../../../_utilities/formatDate";
 
 import ManageDataField from "../../../components/action/ManageDataField";
+import { toggleModal } from "../../../_utilities/toggleModal";
+import Overlay from "../../../components/container/Overlay";
 
 export default function Assignments() {
   const [selectedClass, setSelectedClass] = useState(false);
@@ -93,44 +95,6 @@ export default function Assignments() {
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
-  };
-
-  const closeModal = () => {
-    setModal({ ...modal, isActive: false });
-  };
-
-  const toggleModal = (param) => {
-    const {
-      mode = "field",
-      isActive = false,
-      isEdit = false,
-      isDelete = false,
-      isView = false,
-      type,
-      fields,
-      itemId,
-      itemShow,
-      onAdd,
-      onRemove,
-      onClose = closeModal,
-      onSubmit,
-    } = param;
-
-    setModal({
-      mode,
-      isActive,
-      isEdit,
-      isDelete,
-      isView,
-      type,
-      fields,
-      itemId,
-      itemShow,
-      onAdd,
-      onRemove,
-      onClose,
-      onSubmit,
-    });
   };
 
   const handleSelect = (uid) => {
@@ -314,7 +278,7 @@ export default function Assignments() {
       {
         name: "classroom",
         label: "Classroom",
-        value: `${item?.classroom?.class_code} - ${item?.classroom?.name}`,
+        value: `${item?.class_code} - ${item?.classroom?.name}`,
       },
       {
         name: "answer",
@@ -344,11 +308,14 @@ export default function Assignments() {
               title="Select classroom"
               onClick={() =>
                 toggleModal({
+                  title: "SELECT CLASSROOM",
+                  message: "Clasroom selected",
                   isActive: true,
                   type: "Classrooms",
                   itemId: "class_code",
                   fields: classroomFields,
                   onSubmit: setSelectedClass,
+                  setModal,
                 })
               }
             >
@@ -360,11 +327,14 @@ export default function Assignments() {
               disabled={!selectedClass}
               onClick={() =>
                 toggleModal({
+                  title: `ADD ASSIGNMENT: ${selectedClass?.class_code}`,
+                  message: "Create assignment success",
                   isActive: true,
                   type: "Assignment",
                   itemId: "assignment_number",
                   fields: fields(),
                   onSubmit: handleAddData,
+                  setModal,
                 })
               }
             >
@@ -376,12 +346,15 @@ export default function Assignments() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  title: `EDIT ASSIGNMENT ${selectedClass?.class_code}`,
+                  message: "Update assignment success",
                   isActive: true,
                   isEdit: true,
                   type: "Assignment",
                   itemId: "assignment_number",
                   fields: fields(selectedIds[0]),
                   onSubmit: handleEditData,
+                  setModal,
                 })
               }
             >
@@ -401,11 +374,13 @@ export default function Assignments() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  title: "VIEW ASSIGNMENT",
                   isActive: true,
                   isView: true,
                   type: "Assignment",
                   itemId: "assignment_number",
                   fields: fields(selectedIds[0], true),
+                  setModal,
                 })
               }
             >
@@ -532,21 +507,26 @@ export default function Assignments() {
       </div>
 
       {modal.isActive && modal.mode === "field" ? (
-        <ManageDataField
-          isActive={modal?.isActive}
-          isEdit={modal?.isEdit}
-          isView={modal?.isView}
-          class_code={selectedClass?.class_code}
-          item_id={modal?.itemId}
-          type={modal?.type}
-          fields={modal?.fields}
-          onClose={modal?.onClose}
-          onSubmit={modal?.onSubmit}
-          loadingSetting={switchLoading}
-          allertSetting={setAllertSetting}
-          fetchData={refreshData}
-          item={data?.find((item) => item?.assignment_number == selectedIds[0])}
-        />
+        <Overlay isActive={modal?.isActive} onClose={modal?.onClose}>
+          <ManageDataField
+            title={modal?.title}
+            message={modal?.message}
+            isEdit={modal?.isEdit}
+            isView={modal?.isView}
+            parentId={selectedClass?.class_code}
+            item_id={modal?.itemId}
+            type={modal?.type}
+            fields={modal?.fields}
+            onClose={modal?.onClose}
+            onSubmit={modal?.onSubmit}
+            loadingSetting={switchLoading}
+            allertSetting={setAllertSetting}
+            refreshData={refreshData}
+            item={data?.find(
+              (item) => item?.assignment_number == selectedIds[0]
+            )}
+          />
+        </Overlay>
       ) : null}
     </main>
   );

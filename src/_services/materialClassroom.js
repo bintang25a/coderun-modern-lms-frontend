@@ -6,21 +6,10 @@ export const getClassMaterials = async () => {
   return response.data;
 };
 
-export const createClassMaterial = async (data) => {
+export const createClassMaterial = async (classCode, material_number) => {
   try {
-    const response = await API.post("/classmaterial", data);
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    throw message(error);
-  }
-};
-
-export const updateClassMaterial = async (classCode, material_number, data) => {
-  try {
-    const response = await API.patch(
-      `classmaterial/${classCode}/${material_number}`,
-      data
+    const response = await API.post(
+      `classmaterial/${classCode}/${material_number}`
     );
     return response.data;
   } catch (error) {

@@ -1,15 +1,9 @@
 import { useState, useEffect } from "react";
-import {
-  FaCircleXmark,
-  FaUserPlus,
-  FaUserMinus,
-  FaPaperPlane,
-} from "react-icons/fa6";
+import { FaPaperPlane, FaSquarePlus, FaCircleMinus } from "react-icons/fa6";
 
 const ManageDataTransfer = ({
-  isActive = false,
-  type = "",
-  class_code = "",
+  title = "",
+  parent_id = "",
   item_id = "",
   item_show = "",
   inBoxItems = [],
@@ -18,19 +12,19 @@ const ManageDataTransfer = ({
   onAdd,
   onRemove,
   allertSetting,
-  fetchData,
+  refreshData,
 }) => {
-  const [localGeneral, setLocalGeneral] = useState([]);
-  const [localClassroom, setLocalClassroom] = useState([]);
+  const [outBox, setOutBox] = useState([]);
+  const [inBox, setInBox] = useState([]);
   const [isChange, setIsChange] = useState(false);
 
   useEffect(() => {
-    setLocalGeneral(outBoxItems);
-    setLocalClassroom(inBoxItems);
+    setOutBox(outBoxItems);
+    setInBox(inBoxItems);
   }, [outBoxItems, inBoxItems]);
 
   const handleClose = async () => {
-    isChange ? await fetchData() : null;
+    isChange ? await refreshData() : null;
     onClose();
   };
 
@@ -39,18 +33,18 @@ const ManageDataTransfer = ({
     const id = item[item_id];
 
     if (actionType === "add") {
-      setLocalClassroom((prev) => prev.filter((i) => i[item_id] !== id));
-      setLocalGeneral((prev) => [...prev, item]);
+      setOutBox((prev) => prev.filter((i) => i[item_id] !== id));
+      setInBox((prev) => [...prev, item]);
     } else {
-      setLocalGeneral((prev) => prev.filter((i) => i[item_id] !== id));
-      setLocalClassroom((prev) => [...prev, item]);
+      setInBox((prev) => prev.filter((i) => i[item_id] !== id));
+      setOutBox((prev) => [...prev, item]);
     }
 
     try {
       if (actionType === "add") {
-        await onRemove(class_code, id);
+        await onAdd(parent_id, id);
       } else {
-        await onAdd({ class_code, [item_id]: id });
+        await onRemove(parent_id, id);
       }
     } catch (error) {
       console.log(error);
@@ -60,73 +54,66 @@ const ManageDataTransfer = ({
         message: "Server sync failed. Rolling back...",
         isSuccess: false,
       });
-      await fetchData();
+      await refreshData();
     }
   };
 
   return (
-    <div className={`overlay__action-component ${isActive ? "" : "inactive"}`}>
-      <div className="form__action-component">
-        <h2 className="title__action-component">MANAGE {type.toUpperCase()}</h2>
-        <p className="description__action-component">
-          Class: <b>{class_code}</b>
-        </p>
+    <div className="manage-data__action-component">
+      <h2 className="title__action-component">MANAGE {title.toUpperCase()}</h2>
+      <p className="description__action-component">
+        ID: <b>{parent_id}</b>
+      </p>
 
-        <div className="input-container__action-component">
-          <div className="input-field__action-component">
-            <label className="label__action-component">
-              General {type}s ({localGeneral?.length})
-            </label>
-            <div className="box__action-component">
-              {localGeneral?.map((item) => (
-                <div
-                  key={item[item_id]}
-                  className="item__action-component"
-                  onClick={() => handleAction(item, "remove")}
-                >
-                  <span>
-                    {item[item_id]} - {item[item_show]}
-                  </span>
-                  <FaUserPlus className="add-icon__action-component" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="input-field__action-component">
-            <label className="label__action-component">
-              Classroom {type}s ({localClassroom?.length})
-            </label>
-            <div className="box__action-component">
-              {localClassroom?.map((item) => (
-                <div
-                  key={item[item_id]}
-                  className="item__action-component"
-                  onClick={() => handleAction(item, "add")}
-                >
-                  <span>
-                    {item[item_id]} - {item[item_show]}
-                  </span>
-                  <FaUserMinus className="remove-icon__action-component" />
-                </div>
-              ))}
-            </div>
+      <div className="input-container__action-component">
+        <div className="input-field__action-component">
+          <label className="label__action-component">
+            General {title}s ({outBox?.length})
+          </label>
+          <div className="box__action-component">
+            {outBox?.map((item) => (
+              <div
+                key={item[item_id]}
+                className="item__action-component"
+                onClick={() => handleAction(item, "add")}
+              >
+                <span>
+                  {item[item_id]} - {item[item_show]}
+                </span>
+                <FaSquarePlus className="add-icon__action-component" />
+              </div>
+            ))}
           </div>
         </div>
 
-        <button
-          className="button__action-component"
-          type="submit"
-          onClick={handleClose}
-        >
-          <FaPaperPlane /> Finish & Close
-        </button>
-
-        <FaCircleXmark
-          className="icon-close__action-component"
-          onClick={handleClose}
-        />
+        <div className="input-field__action-component">
+          <label className="label__action-component">
+            Classroom {title}s ({inBox?.length})
+          </label>
+          <div className="box__action-component">
+            {inBox?.map((item) => (
+              <div
+                key={item[item_id]}
+                className="item__action-component"
+                onClick={() => handleAction(item, "remove")}
+              >
+                <span>
+                  {item[item_id]} - {item[item_show]}
+                </span>
+                <FaCircleMinus className="remove-icon__action-component" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+
+      <button
+        className="button__action-component"
+        type="submit"
+        onClick={handleClose}
+      >
+        <FaPaperPlane /> Finish
+      </button>
     </div>
   );
 };

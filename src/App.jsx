@@ -19,9 +19,10 @@ import Classroom from "./pages/public/classrooms/show";
 import Assignment from "./pages/public/assignments/show";
 import Submission from "./pages/public/submissions";
 import Profile from "./pages/auth/Profile";
-import AssignmentAsistant from "./pages/public/assignments/AssignmentAsistant";
-import AssignmentsAssistant from "./pages/public/assignments/AssignmentsAsistant";
+import AssignmentAsistant from "./pages/public/assignments-assistant/show";
+import AssignmentsAssistant from "./pages/public/assignments-assistant";
 import Materials from "./pages/public/materials";
+import MaterialsAssistant from "./pages/public/materials/MaterialsAsistant";
 
 export default function App() {
   const role = localStorage.getItem("user")?.role;
@@ -64,7 +65,7 @@ export default function App() {
           }
         >
           <Route path="student" element={<PublicLayout />}>
-            <Route index element={<main>Haii</main>} />
+            <Route index element={<main>On Progress</main>} />
             <Route path="classrooms" element={<Classrooms />} />
             <Route path="classrooms/:id" element={<Classroom />} />
             <Route path="materials" element={<main></main>} />
@@ -77,8 +78,12 @@ export default function App() {
 
         <Route element={<ProtectedRole allowedRoles={["Asisten", "Admin"]} />}>
           <Route path="assistant" element={<PublicLayout />}>
-            <Route index element={<main>Haii</main>} />
+            <Route index element={<main>On Progress</main>} />
             <Route path="classrooms" element={<Classrooms />} />
+            <Route
+              path="classrooms/materials"
+              element={<MaterialsAssistant />}
+            ></Route>
             <Route
               path="classrooms/assignments"
               element={<AssignmentsAssistant />}
@@ -95,7 +100,7 @@ export default function App() {
 
         <Route element={<ProtectedRole allowedRoles={["Admin"]} />}>
           <Route path="admin" element={<AdminLayout />}>
-            <Route index element={<main>Haii</main>} />
+            <Route index element={<main>On Progress</main>} />
             <Route path="users" element={<UsersAdmin />} />
             <Route path="classrooms" element={<ClassroomsAdmin />} />
             <Route path="materials" element={<MaterialsAdmin />} />

@@ -41,20 +41,19 @@ export default function Classroom() {
   }, []);
 
   useEffect(() => {
-    // const tempUser = localStorage.getItem("user");
-    // const fixUser = tempUser ? JSON.parse(tempUser) : "";
-    // setClassroom(
-    //   fixUser?.role === "Asisten"
-    //     ? state?.data?.assists
-    //     : state?.data?.classrooms
-    // );
+    setClassroom(state?.classroom || {});
   }, [state]);
 
   return (
     <main className="__public-page">
       <nav className="navbar__public-page">
         <section className="left__public-page">
-          <h1 className="title__public-page">{classroom?.name}</h1>
+          <Link
+            to={`/${userRole}/classrooms/${classroom?.class_code}`}
+            className="title__public-page"
+          >
+            {classroom?.name}
+          </Link>
         </section>
 
         <section className="right__public-page">
@@ -85,9 +84,9 @@ export default function Classroom() {
       </nav>
       <div className="content-container__public-page">
         <ItemList
-          title={`Assignments: ${classroom?.materials?.length}`}
+          title={`Materials: ${classroom?.materials?.length}`}
           items={classroom?.materials}
-          settings={{ id: "materials_number", show: "title" }}
+          settings={{ id: "material_number", show: "title" }}
           link={`${userRole}/classrooms/materials`}
           disabled={false}
         />

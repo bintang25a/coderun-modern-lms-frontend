@@ -3,12 +3,13 @@ import {
   getSubmissions,
   deleteSubmission,
 } from "../../../_services/submissions";
-import "../admin.css";
 import { FaEraser, FaMagnifyingGlass, FaRegEye } from "react-icons/fa6";
 import { useOutletContext } from "react-router-dom";
 import { formatDate } from "../../../_utilities/formatDate";
-
+import Overlay from "../../../components/container/Overlay";
 import ManageDataField from "../../../components/action/ManageDataField";
+import { toggleModal } from "../../../_utilities/toggleModal";
+import "../admin.css";
 
 export default function Submissions() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -82,44 +83,6 @@ export default function Submissions() {
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
-  };
-
-  const closeModal = () => {
-    setModal({ ...modal, isActive: false });
-  };
-
-  const toggleModal = (param) => {
-    const {
-      mode = "field",
-      isActive = false,
-      isEdit = false,
-      isDelete = false,
-      isView = false,
-      type,
-      fields,
-      itemId,
-      itemShow,
-      onAdd,
-      onRemove,
-      onClose = closeModal,
-      onSubmit,
-    } = param;
-
-    setModal({
-      mode,
-      isActive,
-      isEdit,
-      isDelete,
-      isView,
-      type,
-      fields,
-      itemId,
-      itemShow,
-      onAdd,
-      onRemove,
-      onClose,
-      onSubmit,
-    });
   };
 
   const handleSelect = (uid) => {
@@ -261,11 +224,13 @@ export default function Submissions() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  title: "VIEW SUBMISSION",
                   isActive: true,
                   isView: true,
                   type: "Assignment",
                   itemId: "assignment_number",
                   fields: fields(selectedIds[0]),
+                  setModal,
                 })
               }
             >
@@ -396,20 +361,24 @@ export default function Submissions() {
       </div>
 
       {modal.isActive && modal.mode === "field" ? (
-        <ManageDataField
-          isActive={modal?.isActive}
-          isEdit={modal?.isEdit}
-          isView={modal?.isView}
-          item_id={modal?.itemId}
-          type={modal?.type}
-          fields={modal?.fields}
-          onClose={modal?.onClose}
-          onSubmit={modal?.onSubmit}
-          loadingSetting={switchLoading}
-          allertSetting={setAllertSetting}
-          fetchData={refreshData}
-          item={data?.find((item) => item?.submission_number == selectedIds[0])}
-        />
+        <Overlay isActive={modal?.isActive} onClose={modal?.onClose}>
+          <ManageDataField
+            title={modal?.title}
+            isEdit={modal?.isEdit}
+            isView={modal?.isView}
+            item_id={modal?.itemId}
+            type={modal?.type}
+            fields={modal?.fields}
+            onClose={modal?.onClose}
+            onSubmit={modal?.onSubmit}
+            loadingSetting={switchLoading}
+            allertSetting={setAllertSetting}
+            fetchData={refreshData}
+            item={data?.find(
+              (item) => item?.submission_number == selectedIds[0]
+            )}
+          />
+        </Overlay>
       ) : null}
     </main>
   );

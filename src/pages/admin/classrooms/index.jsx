@@ -36,6 +36,8 @@ import {
 import ManageDataTransfer from "../../../components/action/ManageDataTransfer";
 import ManageDataField from "../../../components/action/ManageDataField";
 import { createAssignment } from "../../../_services/assignments";
+import { toggleModal } from "../../../_utilities/toggleModal";
+import Overlay from "../../../components/container/Overlay";
 
 export default function Classrooms() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -114,44 +116,6 @@ export default function Classrooms() {
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
-  };
-
-  const closeModal = () => {
-    setModal({ ...modal, isActive: false });
-  };
-
-  const toggleModal = (param) => {
-    const {
-      mode = "field",
-      isActive = false,
-      isEdit = false,
-      isDelete = false,
-      isView = false,
-      type,
-      fields,
-      itemId,
-      itemShow,
-      onAdd,
-      onRemove,
-      onClose = closeModal,
-      onSubmit,
-    } = param;
-
-    setModal({
-      mode,
-      isActive,
-      isEdit,
-      isDelete,
-      isView,
-      type,
-      fields,
-      itemId,
-      itemShow,
-      onAdd,
-      onRemove,
-      onClose,
-      onSubmit,
-    });
   };
 
   const handleSelect = (uid) => {
@@ -330,12 +294,14 @@ export default function Classrooms() {
               onClick={() =>
                 toggleModal({
                   mode: "transfer",
+                  title: "Assistant",
                   isActive: true,
                   type: "assistant",
                   itemId: "uid",
                   itemShow: "name",
                   onAdd: createAssistant,
                   onRemove: deleteAssistant,
+                  setModal,
                 })
               }
             >
@@ -348,12 +314,14 @@ export default function Classrooms() {
               onClick={() =>
                 toggleModal({
                   mode: "transfer",
+                  title: "Student",
                   isActive: true,
                   type: "student",
                   itemId: "uid",
                   itemShow: "name",
                   onAdd: createStudent,
                   onRemove: deleteStudent,
+                  setModal,
                 })
               }
             >
@@ -366,12 +334,13 @@ export default function Classrooms() {
               onClick={() =>
                 toggleModal({
                   mode: "transfer",
+                  title: "Material",
                   isActive: true,
-                  type: "material",
                   itemId: "material_number",
                   itemShow: "title",
                   onAdd: createClassMaterial,
                   onRemove: deleteClassMaterial,
+                  setModal,
                 })
               }
             >
@@ -383,11 +352,13 @@ export default function Classrooms() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  title: "ADD ASIGNMENT",
+                  message: "Add assignment success",
                   isActive: true,
-                  type: "assignment",
                   itemId: "assignment_number",
                   fields: assignmentFields,
                   onSubmit: handleAddAssignment,
+                  setModal,
                 })
               }
             >
@@ -398,11 +369,13 @@ export default function Classrooms() {
               title="Add data"
               onClick={() =>
                 toggleModal({
+                  title: "ADD CLASSROOM",
+                  message: "Create classroom success",
                   isActive: true,
-                  type: "Student",
                   itemId: "class_code",
                   fields: fields(selectedIds[0]),
                   onSubmit: createClassroom,
+                  setModal,
                 })
               }
             >
@@ -414,12 +387,14 @@ export default function Classrooms() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  title: "EDIT CLASSROOM",
+                  message: "Update classroom success",
                   isActive: true,
                   isEdit: true,
                   itemId: "class_code",
-                  type: "Student",
                   fields: fields(selectedIds[0]),
                   onSubmit: updateClassroom,
+                  setModal,
                 })
               }
             >
@@ -439,11 +414,13 @@ export default function Classrooms() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  title: "VIEW CLASSROOM",
                   isActive: true,
                   isView: true,
                   type: "Classroom",
                   itemId: "uid",
                   fields: fields(selectedIds[0], true),
+                  setModal,
                 })
               }
             >
@@ -562,64 +539,67 @@ export default function Classrooms() {
       </div>
 
       {modal.isActive && modal.mode === "transfer" ? (
-        <ManageDataTransfer
-          isActive={modal?.isActive}
-          isDelete={modal?.isDelete}
-          type={modal?.type}
-          class_code={selectedIds[0]}
-          item_id={modal.itemId}
-          item_show={modal.itemShow}
-          onClose={modal.onClose}
-          onAdd={modal.onAdd}
-          onRemove={modal.onRemove}
-          loadingSetting={switchLoading}
-          allertSetting={setAllertSetting}
-          fetchData={refreshData}
-          inBoxItems={
-            modal.type.toLowerCase() === "assistant"
-              ? selectedClass?.assistants || []
-              : modal.type.toLowerCase() === "student"
-              ? selectedClass?.students || []
-              : selectedClass?.materials || []
-          }
-          outBoxItems={
-            modal.type.toLowerCase() === "assistant"
-              ? users.filter(
-                  (u) =>
-                    u.role === "Asisten" &&
-                    !selectedClass?.assistants?.some((a) => a.uid === u.uid)
-                )
-              : modal.type.toLowerCase() === "student"
-              ? users.filter(
-                  (u) =>
-                    u.role !== "Admin" &&
-                    !selectedClass?.students?.some((s) => s.uid === u.uid)
-                )
-              : materials.filter(
-                  (m) =>
-                    !selectedClass?.materials?.some(
-                      (sm) => sm.material_number === m.material_number
-                    )
-                )
-          }
-        />
+        <Overlay isActive={modal?.isActive} onClose={modal?.onClose}>
+          <ManageDataTransfer
+            title={modal?.title}
+            parent_id={selectedIds[0]}
+            item_id={modal.itemId}
+            item_show={modal.itemShow}
+            onClose={modal.onClose}
+            onAdd={modal.onAdd}
+            onRemove={modal.onRemove}
+            loadingSetting={switchLoading}
+            allertSetting={setAllertSetting}
+            refreshData={refreshData}
+            inBoxItems={
+              modal.type.toLowerCase() === "assistant"
+                ? selectedClass?.assistants || []
+                : modal.type.toLowerCase() === "student"
+                ? selectedClass?.students || []
+                : selectedClass?.materials || []
+            }
+            outBoxItems={
+              modal.type.toLowerCase() === "assistant"
+                ? users.filter(
+                    (u) =>
+                      u.role === "Asisten" &&
+                      !selectedClass?.assistants?.some((a) => a.uid === u.uid)
+                  )
+                : modal.type.toLowerCase() === "student"
+                ? users.filter(
+                    (u) =>
+                      u.role !== "Admin" &&
+                      !selectedClass?.students?.some((s) => s.uid === u.uid)
+                  )
+                : materials.filter(
+                    (m) =>
+                      !selectedClass?.materials?.some(
+                        (sm) => sm.material_number === m.material_number
+                      )
+                  )
+            }
+          />
+        </Overlay>
       ) : null}
 
       {modal.isActive && modal.mode === "field" ? (
-        <ManageDataField
-          isActive={modal?.isActive}
-          isEdit={modal?.isEdit}
-          isView={modal?.isView}
-          item_id={modal?.itemId}
-          type={modal?.type}
-          fields={modal?.fields}
-          onClose={modal?.onClose}
-          onSubmit={modal?.onSubmit}
-          loadingSetting={switchLoading}
-          allertSetting={setAllertSetting}
-          fetchData={refreshData}
-          item={data?.find((item) => item.class_code == selectedIds[0])}
-        />
+        <Overlay isActive={modal?.isActive} onClose={modal?.onClose}>
+          <ManageDataField
+            title={modal?.title}
+            message={modal?.message}
+            isEdit={modal?.isEdit}
+            isView={modal?.isView}
+            item_id={modal?.itemId}
+            type={modal?.type}
+            fields={modal?.fields}
+            onClose={modal?.onClose}
+            onSubmit={modal?.onSubmit}
+            loadingSetting={switchLoading}
+            allertSetting={setAllertSetting}
+            refreshData={refreshData}
+            item={data?.find((item) => item.class_code == selectedIds[0])}
+          />
+        </Overlay>
       ) : null}
     </main>
   );

@@ -1,8 +1,18 @@
+import io from "socket.io-client";
 import axios from "axios";
 
+const baseURL = "http://localhost:5000";
+
+export const socket = io(baseURL, {
+  transports: ["websocket"],
+  upgrade: false,
+  auth: {
+    token: localStorage.getItem("token"),
+  },
+});
+
 const API = axios.create({
-  baseURL: "http://localhost:5000",
-  //  baseURL: "http://127.0.0.1:8000/api",
+  baseURL,
 });
 
 API.interceptors.request.use(

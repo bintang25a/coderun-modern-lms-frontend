@@ -17,6 +17,9 @@ main.__public-page {
       .title__public-page {
         font-size: var(--fs-8);
         font-weight: 700;
+        color: var(--primary);
+
+        cursor: pointer;
 
         .span__public-page {
           font-weight: 500;
@@ -26,6 +29,7 @@ main.__public-page {
       }
       .title__public-page:hover {
         transform: scale(1.05);
+        color: var(--secondary);
       }
     }
 
@@ -85,6 +89,11 @@ main.__public-page {
         }
         .button__public-page:disabled .icon__public-page {
           color: var(--gray-200);
+        }
+        .button__public-page.active {
+          background-color: var(--primary);
+          border-color: var(--primary);
+          color: var(--white);
         }
 
         .icon__public-page {
@@ -609,6 +618,7 @@ main.__public-page {
   width: 100%;
 
   display: flex;
+  flex-wrap: wrap;
   gap: var(--px-8);
 
   .toolbar-item__public-page {
@@ -620,22 +630,23 @@ main.__public-page {
     background-color: var(--gray-50);
     border: var(--px-2) solid var(--secondary);
     border-radius: var(--px-4);
-    padding: var(--px-8) var(--px-24);
+    padding: var(--px-8) var(--px-16);
 
     font-size: var(--fs-4);
     font-weight: 600;
     color: var(--primary);
+
+    white-space: nowrap;
 
     cursor: pointer;
 
     option {
       font-family: "Courier New", monospace;
     }
-  }
-  input.toolbar-item__public-page {
-    width: var(--px-80);
-    padding: var(--px-8);
-    text-align: center;
+
+    input[type="file"] {
+      display: none;
+    }
   }
   .toolbar-item__public-page:hover:not(:disabled):not(select):not(input) {
     background-color: var(--secondary);
@@ -644,11 +655,16 @@ main.__public-page {
   .toolbar-item__public-page:disabled {
     background-color: var(--gray-100);
     color: var(--gray-200);
+    border-color: var(--gray-100);
+  }
+  input.toolbar-item__public-page {
+    width: var(--px-80);
+    padding: var(--px-8);
+    text-align: center;
   }
 }
 .toolbar__public-page.vertical {
   flex-direction: column;
-  padding: var(--px-24) 0;
 
   .toolbar-item__public-page:not(:first-child) {
     justify-content: start;

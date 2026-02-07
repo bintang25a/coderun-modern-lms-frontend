@@ -18,6 +18,8 @@ import { FaFileUpload, FaPaperPlane } from "react-icons/fa";
 import { useOutletContext } from "react-router-dom";
 import ManageDataField from "../../../components/action/ManageDataField";
 import AddDataCsv from "../../../components/action/AddDataCsv";
+import Overlay from "../../../components/container/Overlay";
+import { toggleModal } from "../../../_utilities/toggleModal";
 
 export default function Users() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -92,44 +94,6 @@ export default function Users() {
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
-  };
-
-  const closeModal = () => {
-    setModal({ ...modal, isActive: false });
-  };
-
-  const toggleModal = (param) => {
-    const {
-      mode,
-      isActive = false,
-      isEdit = false,
-      isDelete = false,
-      isView = false,
-      type,
-      fields,
-      itemId,
-      itemShow,
-      onAdd,
-      onRemove,
-      onClose = closeModal,
-      onSubmit,
-    } = param;
-
-    setModal({
-      mode,
-      isActive,
-      isEdit,
-      isDelete,
-      isView,
-      type,
-      fields,
-      itemId,
-      itemShow,
-      onAdd,
-      onRemove,
-      onClose,
-      onSubmit,
-    });
   };
 
   const handleSelect = (uid) => {
@@ -265,6 +229,7 @@ export default function Users() {
                   mode: "file",
                   isActive: true,
                   onSubmit: createUser,
+                  setModal,
                 })
               }
             >
@@ -275,11 +240,14 @@ export default function Users() {
               title="Add data"
               onClick={() =>
                 toggleModal({
+                  title: "ADD USER",
+                  message: "Create user success",
                   isActive: true,
                   type: "User",
                   itemId: "uid",
                   fields: fields(selectedIds[0]),
                   onSubmit: createUser,
+                  setModal,
                 })
               }
             >
@@ -291,12 +259,15 @@ export default function Users() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  title: "EDIT USER",
+                  message: "Update user success",
                   isActive: true,
                   isEdit: true,
                   type: "User",
                   itemId: "uid",
                   onSubmit: updateUser,
                   fields: fields(selectedIds[0]),
+                  setModal,
                 })
               }
             >
@@ -316,11 +287,13 @@ export default function Users() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  title: "VIEW USER",
                   isActive: true,
                   isView: true,
                   type: "User",
                   itemId: "uid",
                   fields: fields(selectedIds[0], true),
+                  setModal,
                 })
               }
             >
@@ -424,34 +397,38 @@ export default function Users() {
       </div>
 
       {modal.isActive && modal.mode !== "file" ? (
-        <ManageDataField
-          isActive={modal?.isActive}
-          isEdit={modal?.isEdit}
-          isView={modal?.isView}
-          item_id={modal?.itemId}
-          type={modal?.type}
-          fields={modal?.fields}
-          onClose={modal?.onClose}
-          onSubmit={modal?.onSubmit}
-          loadingSetting={switchLoading}
-          allertSetting={setAllertSetting}
-          fetchData={refreshData}
-          item={{
-            ...data?.find((item) => item.uid == selectedIds[0]),
-            password: "",
-          }}
-        />
+        <Overlay isActive={modal?.isActive} onClose={modal?.onClose}>
+          <ManageDataField
+            title={modal?.title}
+            message={modal?.message}
+            isEdit={modal?.isEdit}
+            isView={modal?.isView}
+            item_id={modal?.itemId}
+            type={modal?.type}
+            fields={modal?.fields}
+            onClose={modal?.onClose}
+            onSubmit={modal?.onSubmit}
+            loadingSetting={switchLoading}
+            allertSetting={setAllertSetting}
+            refreshData={refreshData}
+            item={{
+              ...data?.find((item) => item.uid == selectedIds[0]),
+              password: "",
+            }}
+          />
+        </Overlay>
       ) : null}
 
       {modal.isActive && modal.mode === "file" ? (
-        <AddDataCsv
-          isActive={modal?.isActive}
-          onClose={modal.onClose}
-          onSubmit={modal.onSubmit}
-          loadingSetting={switchLoading}
-          allertSetting={setAllertSetting}
-          fetchData={refreshData}
-        />
+        <Overlay isActive={modal?.isActive} onClose={modal?.onClose}>
+          <AddDataCsv
+            onClose={modal.onClose}
+            onSubmit={modal.onSubmit}
+            loadingSetting={switchLoading}
+            allertSetting={setAllertSetting}
+            refreshData={refreshData}
+          />
+        </Overlay>
       ) : null}
     </main>
   );

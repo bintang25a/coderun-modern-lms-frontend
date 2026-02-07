@@ -7,7 +7,6 @@ import {
 } from "../../../_services/materials";
 import "../admin.css";
 import {
-  FaCircleXmark,
   FaEraser,
   FaMagnifyingGlass,
   FaPenToSquare,
@@ -15,6 +14,8 @@ import {
   FaSquarePlus,
 } from "react-icons/fa6";
 import { useOutletContext } from "react-router-dom";
+import { toggleModal } from "../../../_utilities/toggleModal";
+import Overlay from "../../../components/container/Overlay";
 import ManageDataField from "../../../components/action/ManageDataField";
 
 export default function Materials() {
@@ -62,44 +63,6 @@ export default function Materials() {
   useEffect(() => {
     setData(state?.data || []);
   }, [state]);
-
-  const closeModal = () => {
-    setModal({ ...modal, isActive: false });
-  };
-
-  const toggleModal = (param) => {
-    const {
-      mode = "field",
-      isActive = false,
-      isEdit = false,
-      isDelete = false,
-      isView = false,
-      type,
-      fields,
-      itemId,
-      itemShow,
-      onAdd,
-      onRemove,
-      onClose = closeModal,
-      onSubmit,
-    } = param;
-
-    setModal({
-      mode,
-      isActive,
-      isEdit,
-      isDelete,
-      isView,
-      type,
-      fields,
-      itemId,
-      itemShow,
-      onAdd,
-      onRemove,
-      onClose,
-      onSubmit,
-    });
-  };
 
   const filteredData = data.filter((item) => {
     const columnsToSearch = [
@@ -196,8 +159,6 @@ export default function Materials() {
   const fields = (id = 0, isView = false) => {
     const item = currentData.find((item) => item?.material_number == id);
 
-    console.log(item);
-
     const actionFields = [
       {
         name: "title",
@@ -258,11 +219,14 @@ export default function Materials() {
               title="Add data"
               onClick={() =>
                 toggleModal({
+                  title: "ADD MATERIAL",
+                  message: "Create material success",
                   isActive: true,
                   type: "Material",
                   itemId: "material_number",
                   fields: fields(),
                   onSubmit: createMaterial,
+                  setModal,
                 })
               }
             >
@@ -274,12 +238,15 @@ export default function Materials() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  title: "EDIT MATERIAL",
+                  message: "Update material success",
                   isActive: true,
                   isEdit: true,
                   type: "Material",
                   itemId: "material_number",
                   fields: fields(selectedIds[0]),
                   onSubmit: updateMaterial,
+                  setModal,
                 })
               }
             >
@@ -299,11 +266,13 @@ export default function Materials() {
               disabled={selectedIds.length != 1}
               onClick={() =>
                 toggleModal({
+                  title: "VIEW MATERIAL",
                   isActive: true,
                   isView: true,
                   type: "Material",
                   itemId: "material_number",
                   fields: fields(selectedIds[0], true),
+                  setModal,
                 })
               }
             >
@@ -408,20 +377,23 @@ export default function Materials() {
       </div>
 
       {modal.isActive ? (
-        <ManageDataField
-          isActive={modal?.isActive}
-          isEdit={modal?.isEdit}
-          isView={modal?.isView}
-          item_id={modal.itemId}
-          type={modal?.type}
-          fields={modal?.fields}
-          onClose={modal?.onClose}
-          onSubmit={modal?.onSubmit}
-          loadingSetting={switchLoading}
-          allertSetting={setAllertSetting}
-          fetchData={refreshData}
-          item={data?.find((item) => item.material_number == selectedIds[0])}
-        />
+        <Overlay isActive={modal?.isActive} onClose={modal?.onClose}>
+          <ManageDataField
+            title={modal?.title}
+            message={modal?.message}
+            isEdit={modal?.isEdit}
+            isView={modal?.isView}
+            item_id={modal.itemId}
+            type={modal?.type}
+            fields={modal?.fields}
+            onClose={modal?.onClose}
+            onSubmit={modal?.onSubmit}
+            loadingSetting={switchLoading}
+            allertSetting={setAllertSetting}
+            refreshData={refreshData}
+            item={data?.find((item) => item.material_number == selectedIds[0])}
+          />
+        </Overlay>
       ) : null}
     </main>
   );

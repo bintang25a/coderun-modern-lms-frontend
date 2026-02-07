@@ -10,12 +10,14 @@ import Alert from "../components/screen/Alert";
 import Confirm from "../components/screen/Confirm";
 import { showUser } from "../_services/users";
 import { showAssignment } from "../_services/assignments";
-import { showSubmission } from "../_services/submissions";
+import LoadingMessage from "../components/screen/LoadingMessage";
+import { showClassroom } from "../_services/classrooms";
 
 export default function PublicLayout() {
   const [user, setUser] = useState({});
   const [state, setState] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingSetting, setLoadingSetting] = useState({});
   const [alertSetting, setAllertSetting] = useState({});
   const [confirmSetting, setConfirmSetting] = useState({});
 
@@ -67,18 +69,22 @@ export default function PublicLayout() {
       });
     } else if (pathname.startsWith("/assistant/classrooms/assignments/")) {
       const class_code = localStorage.getItem("class_code");
-      const assignment_number = localStorage.getItem("assignment_number");
-      const submission_number = localStorage.getItem("submission_number");
 
-      const [assignmentData, submissionData] = await Promise.all([
+      const [assignmentData] = await Promise.all([
         showAssignment(class_code, id),
-        showSubmission(assignment_number, submission_number),
       ]);
 
       setState({
         assignment: assignmentData,
         submissions: assignmentData?.submissions,
-        submission: submissionData,
+      });
+    } else if (pathname.startsWith(`/${userRole}/classrooms/`)) {
+      const class_code = localStorage.getItem("class_code");
+
+      const [classroomData] = await Promise.all([showClassroom(class_code)]);
+
+      setState({
+        classroom: classroomData,
       });
     } else if (paramId) {
       const [user] = await Promise.all([showUser(fixUser?.uid)]);
@@ -129,6 +135,7 @@ export default function PublicLayout() {
             switchLoading,
             switchAlert,
             switchConfirm,
+            setLoadingSetting,
             setAllertSetting,
             setConfirmSetting,
             refreshData,
@@ -140,6 +147,7 @@ export default function PublicLayout() {
       </div>
 
       <Loading isActive={isLoading} />
+      <LoadingMessage loadingSetting={loadingSetting} />
       <Alert alertSetting={alertSetting} onClose={() => switchAlert(false)} />
       <Confirm confirmSetting={confirmSetting} />
     </>

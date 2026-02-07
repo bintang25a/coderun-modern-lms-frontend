@@ -11,7 +11,7 @@ export default function Materials() {
   const { switchLoading, setAllertSetting, state, userRole } =
     useOutletContext();
 
-  const [user, setUser] = useState({});
+  // const [user, setUser] = useState({});
   const [materials, setMaterials] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -37,7 +37,7 @@ export default function Materials() {
 
         console.log(classroomsData?.flat());
 
-        setUser(userData);
+        // setUser(userData);
         setMaterials(classroomsData?.flat());
       } catch (error) {
         console.log("Fetch error:", error);
@@ -59,7 +59,7 @@ export default function Materials() {
   useEffect(() => {
     const tempAssignments = state?.classrooms?.flatMap((c) => c?.assignments);
 
-    setUser(state?.data || {});
+    // setUser(state?.data || {});
     setMaterials(tempAssignments || []);
   }, [state]);
 

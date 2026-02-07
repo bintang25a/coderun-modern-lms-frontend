@@ -3,12 +3,11 @@ import Papa from "papaparse";
 import { FaPaperPlane, FaCircleXmark } from "react-icons/fa6";
 
 const AddDataCsv = ({
-  isActive,
   onClose,
   onSubmit,
   loadingSetting,
   allertSetting,
-  fetchData,
+  refreshData,
 }) => {
   const [csvData, setCsvData] = useState([]);
 
@@ -22,10 +21,10 @@ const AddDataCsv = ({
         const data = results.data.map((row) => ({
           uid: row[0],
           name: row[1],
-          email: `${row[0]}@student.umj.ac.id`,
-          phone_number: "0821",
+          role: row[2] || "Praktikan",
+          email: row[3] || `${row[0]}@student.umj.ac.id`,
+          phone_number: row[4] || "0821",
           password: row[0],
-          role: "Praktikan",
         }));
 
         setCsvData(data);
@@ -57,7 +56,7 @@ const AddDataCsv = ({
       });
 
       onClose();
-      fetchData();
+      refreshData();
     } catch (error) {
       allertSetting({
         isActive: true,
@@ -69,44 +68,35 @@ const AddDataCsv = ({
     }
   };
 
-  if (!isActive) return null;
-
   return (
-    <div className={`overlay__action-component ${isActive ? "" : "inactive"}`}>
-      <div className="form__action-component">
-        <h2 className="title__action-component">UPLOAD DATA CSV</h2>
+    <div className="manage-data__action-component">
+      <h2 className="title__action-component">UPLOAD DATA CSV</h2>
 
-        <div className="input-container__action-component">
-          <div className="input-field__action-component">
-            <label className="label__action-component">Choose CSV file</label>
-            <input
-              className="input__action-component"
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-            />
-          </div>
-
-          <div className="input-field__action-component">
-            <label className="label__action-component">Total:</label>
-            <input
-              className="input__action-component"
-              type="text"
-              disabled
-              value={`${csvData?.length} Rows`}
-            />
-          </div>
+      <div className="input-container__action-component">
+        <div className="input-field__action-component">
+          <label className="label__action-component">Choose CSV file</label>
+          <input
+            className="input__action-component"
+            type="file"
+            accept=".csv"
+            onChange={handleFileUpload}
+          />
         </div>
 
-        <button className="button__action-component" onClick={handleSubmit}>
-          <FaPaperPlane /> Submit
-        </button>
-
-        <FaCircleXmark
-          className="icon-close__action-component"
-          onClick={onClose}
-        />
+        <div className="input-field__action-component">
+          <label className="label__action-component">Total:</label>
+          <input
+            className="input__action-component"
+            type="text"
+            disabled
+            value={`${csvData?.length} Rows`}
+          />
+        </div>
       </div>
+
+      <button className="button__action-component" onClick={handleSubmit}>
+        <FaPaperPlane /> Submit
+      </button>
     </div>
   );
 };

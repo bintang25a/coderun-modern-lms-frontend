@@ -11,7 +11,7 @@ import {
 import { runCode } from "../../../_services/actions";
 
 import "../public.css";
-import Toolbar from "../../../components/action/Toolbar";
+import Toolbar from "../../../components/container/Toolbar";
 
 export default function Submission() {
   const { switchLoading, setAllertSetting, state, userRole } =

@@ -1,10 +1,10 @@
 import { useRef } from "react";
-import { FaRotate } from "react-icons/fa6";
+import { FaCircleXmark } from "react-icons/fa6";
 
-const Toolbar = ({ children }) => {
+const Toolbar = ({ id = 0, isCenter = false, onClose, children }) => {
   const divRef = useRef(null);
   const offset = useRef({ x: 0, y: 0 });
-  const storage = localStorage.getItem("toolbarPosition");
+  const storage = localStorage.getItem(`toolbar-${id}Position`);
   const startPoint = storage ? JSON.parse(storage) : { x: 100, y: 100 };
 
   const onMouseMove = (e) => {
@@ -14,7 +14,9 @@ const Toolbar = ({ children }) => {
     const y = e.clientY - offset.current.y;
 
     const xy = { x, y };
-    localStorage.setItem("toolbarPosition", JSON.stringify(xy));
+    if (!isCenter) {
+      localStorage.setItem(`toolbar-${id}Position`, JSON.stringify(xy));
+    }
 
     divRef.current.style.left = `${x}px`;
     divRef.current.style.top = `${y}px`;
@@ -44,13 +46,30 @@ const Toolbar = ({ children }) => {
     <div
       ref={divRef}
       onMouseDown={onMouseDown}
-      className="toolbar__action-component"
-      style={{
-        left: startPoint?.x,
-        top: startPoint?.y,
-      }}
+      className="toolbar__container-component"
+      style={
+        isCenter || !storage
+          ? {
+              left: `50%`,
+              top: `50%`,
+              transform: "translate(-50%, -50%)",
+              zIndex: `${10000 + id}`,
+            }
+          : {
+              left: `${startPoint?.x}px`,
+              top: `${startPoint?.y}px`,
+              zIndex: `${10000 + id}`,
+            }
+      }
     >
       {children}
+
+      {onClose ? (
+        <FaCircleXmark
+          className="icon-close__container-component"
+          onClick={onClose}
+        />
+      ) : null}
     </div>
   );
 };

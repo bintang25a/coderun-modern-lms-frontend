@@ -6,19 +6,9 @@ export const getStudents = async () => {
   return response.data;
 };
 
-export const createStudent = async (data) => {
+export const createStudent = async (classCode, uid) => {
   try {
-    const response = await API.post("/students", data);
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    throw message(error);
-  }
-};
-
-export const updateStudent = async (classCode, uid, data) => {
-  try {
-    const response = await API.post(`students/${classCode}/${uid}`, data);
+    const response = await API.post(`students/${classCode}/${uid}`);
     return response.data;
   } catch (error) {
     console.log(error);

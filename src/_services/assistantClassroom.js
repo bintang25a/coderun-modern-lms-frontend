@@ -6,19 +6,9 @@ export const getAssistants = async () => {
   return response.data;
 };
 
-export const createAssistant = async (data) => {
+export const createAssistant = async (classCode, uid) => {
   try {
-    const response = await API.post("/assistants", data);
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    throw message(error);
-  }
-};
-
-export const updateAssistant = async (classCode, uid, data) => {
-  try {
-    const response = await API.patch(`assistants/${classCode}/${uid}`, data);
+    const response = await API.post(`assistants/${classCode}/${uid}`);
     return response.data;
   } catch (error) {
     console.log(error);
