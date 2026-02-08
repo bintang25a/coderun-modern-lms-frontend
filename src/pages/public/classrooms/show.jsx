@@ -1,15 +1,22 @@
 import "../public.css";
 import { useEffect, useState } from "react";
-import { Link, useOutletContext, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from "react-router-dom";
 import { showClassroom } from "../../../_services/classrooms";
 import { FaBookOpen, FaClipboardList } from "react-icons/fa6";
 import ItemList from "../../../components/grid-item/ItemList";
+import { fileMaterial } from "../../../_services/materials";
 
 export default function Classroom() {
   const { switchLoading, setAllertSetting, state, userRole } =
     useOutletContext();
 
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [classroom, setClassroom] = useState([]);
 
@@ -43,6 +50,14 @@ export default function Classroom() {
   useEffect(() => {
     setClassroom(state?.classroom || {});
   }, [state]);
+
+  const handleAction = async (id) => {
+    const file = await fileMaterial(id);
+
+    localStorage.setItem("blob", file);
+
+    navigate(`/${userRole}/classrooms/materials`);
+  };
 
   return (
     <main className="__public-page">
@@ -88,7 +103,8 @@ export default function Classroom() {
           items={classroom?.materials}
           settings={{ id: "material_number", show: "title" }}
           link={`${userRole}/classrooms/materials`}
-          disabled={false}
+          disabled={true}
+          onAction={handleAction}
         />
         <ItemList
           title={`Assignments: ${classroom?.assignments?.length}`}

@@ -23,7 +23,6 @@ const ManageDataField = ({
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
 
-    console.log(item);
     if (type === "file") {
       setFormData((prev) => ({ ...prev, [name]: files[0] }));
     } else {

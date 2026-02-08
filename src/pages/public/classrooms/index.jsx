@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import { createStudent } from "../../../_services/studentClassroom";
 import ManageDataField from "../../../components/action/ManageDataField";
+import BlankGrid from "../../../components/container/BlankGrid";
 
 export default function Classrooms() {
   const { switchLoading, setAllertSetting, refreshData, state, userRole } =
@@ -164,33 +165,35 @@ export default function Classrooms() {
         </section>
       </nav>
       <div className="content-container__public-page">
-        <div className="classrooms-single-content__public-page span-3__public-page">
-          {classrooms
-            ? filteredData?.map((c) => {
-                const colorClass = getClassColor(c.class_code);
+        <BlankGrid span={{ row: 3, col: 3 }}>
+          <div className="classrooms-container__public-page">
+            {classrooms
+              ? filteredData?.map((c) => {
+                  const colorClass = getClassColor(c.class_code);
 
-                return (
-                  <Link
-                    to={`${c.class_code}`}
-                    key={c.class_code}
-                    className={`classroom-card__public-page ${colorClass}`}
-                  >
-                    <header className="header-card__public-page">
-                      {c.name}
-                    </header>
-                    <main className="main-card__public-page">
-                      Tutor/Asisten:
-                      <br />
-                      {c?.assistants?.map((a) => a.name)?.join("/")}
-                    </main>
-                    <footer className="footer-card__public-page">
-                      Code: {c.class_code}
-                    </footer>
-                  </Link>
-                );
-              })
-            : null}
-        </div>
+                  return (
+                    <Link
+                      to={`${c.class_code}`}
+                      key={c.class_code}
+                      className={`classroom-card__public-page ${colorClass}`}
+                    >
+                      <header className="header-card__public-page">
+                        {c.name}
+                      </header>
+                      <main className="main-card__public-page">
+                        Tutor/Asisten:
+                        <br />
+                        {c?.assistants?.map((a) => a.name)?.join("/")}
+                      </main>
+                      <footer className="footer-card__public-page">
+                        Code: {c.class_code}
+                      </footer>
+                    </Link>
+                  );
+                })
+              : null}
+          </div>
+        </BlankGrid>
       </div>
 
       {modal.isActive && modal.mode === "field" ? (

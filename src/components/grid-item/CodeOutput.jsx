@@ -1,4 +1,12 @@
-const CodeOutput = ({ value, handleChange, output, span = 1, fontSize }) => {
+const CodeOutput = ({
+  value,
+  handleChange,
+  output,
+  span = { row: 3, col: 1 },
+  fontSize,
+}) => {
+  const { row, col } = span;
+
   const classSize = () => {
     if (fontSize === 0) {
       return "fs-small__grid-item-component";
@@ -13,7 +21,11 @@ const CodeOutput = ({ value, handleChange, output, span = 1, fontSize }) => {
 
   return (
     <div
-      className={`code-output__grid-item-component width-${span}__grid-item-component`}
+      className={`code-output__grid-item-component`}
+      style={{
+        gridRow: `span ${row}`,
+        gridColumn: `span ${col}`,
+      }}
     >
       <div className="output-field__grid-item-component">
         <pre className="pre__grid-item-component">

@@ -1,4 +1,12 @@
-const CodeInput = ({ value, handleChange, span = 1, fontSize, children }) => {
+const CodeDisplay = ({
+  value,
+  handleChange,
+  span = { row: 3, col: 2 },
+  fontSize,
+  children,
+}) => {
+  const { row, col } = span;
+
   const classSize = () => {
     if (fontSize === 0) {
       return "fs-small__grid-item-component";
@@ -13,7 +21,11 @@ const CodeInput = ({ value, handleChange, span = 1, fontSize, children }) => {
 
   return (
     <div
-      className={`code-input__grid-item-component width-${span}__grid-item-component`}
+      className={`code-input__grid-item-component`}
+      style={{
+        gridRow: `span ${row}`,
+        gridColumn: `span ${col}`,
+      }}
     >
       <textarea
         className={`input-field__grid-item-component ${classSize()}`}
@@ -28,4 +40,4 @@ const CodeInput = ({ value, handleChange, span = 1, fontSize, children }) => {
   );
 };
 
-export default CodeInput;
+export default CodeDisplay;

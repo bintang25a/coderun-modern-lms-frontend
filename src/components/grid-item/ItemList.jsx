@@ -1,15 +1,38 @@
+import { AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 import { Link } from "react-router-dom";
 
-const ItemList = ({ title, items, settings, span = 1, disabled, link }) => {
-  const saveId = (id) => {
+const ItemList = ({
+  title,
+  items,
+  settings,
+  span = { row: 3, col: 1 },
+  disabled = false,
+  link,
+  onEdit,
+  onDelete,
+  onAction,
+}) => {
+  const isAction = !!onAction;
+
+  const action = (id) => {
     localStorage.setItem([settings?.id], id);
+
+    if (disabled && isAction) {
+      onAction(id);
+    }
   };
 
-  const Component = disabled ? "div" : Link;
+  const { row, col } = span;
+
+  const Component = isAction ? "div" : disabled ? "button" : Link;
 
   return (
     <div
-      className={`item-list__grid-item-component width-${span}__grid-item-component`}
+      className={`item-list__grid-item-component`}
+      style={{
+        gridRow: `span ${row}`,
+        gridColumn: `span ${col}`,
+      }}
     >
       <h1 className="title__grid-item-component">{title}</h1>
       {items?.length > 0 ? (
@@ -18,7 +41,8 @@ const ItemList = ({ title, items, settings, span = 1, disabled, link }) => {
             key={item[settings?.id]}
             to={`/${link}/${item[settings?.id]}`}
             className="item__grid-item-component"
-            onClick={() => saveId(item[settings?.id])}
+            onClick={() => action(item[settings?.id])}
+            disabled={disabled && !isAction}
           >
             <h2
               title={item[settings?.show]}
@@ -26,6 +50,28 @@ const ItemList = ({ title, items, settings, span = 1, disabled, link }) => {
             >
               {`${item[settings?.show]} - [${item[settings?.id]}]`}
             </h2>
+            {onEdit || onDelete ? (
+              <div className="action__grid-item-component">
+                {onEdit ? (
+                  <button
+                    className="button__grid-item-component"
+                    title="Edit data"
+                    onClick={(e) => onEdit(e, item[settings?.id])}
+                  >
+                    <AiOutlineEdit />
+                  </button>
+                ) : null}
+                {onDelete ? (
+                  <button
+                    className="button__grid-item-component"
+                    title="Delete data"
+                    onClick={(e) => onDelete(e, item[settings?.id])}
+                  >
+                    <AiOutlineDelete />
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </Component>
         ))
       ) : (

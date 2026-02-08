@@ -49,6 +49,9 @@ export default function Assignments() {
   const [assignments, setAssignments] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const row = 3;
+  const col = 1;
+
   useEffect(() => {
     const fetchData = async () => {
       const tempUser = localStorage.getItem("user");
@@ -135,7 +138,10 @@ export default function Assignments() {
         </section>
       </nav>
       <div className="content-container__public-page">
-        <div className="assignments-triple-content__public-page">
+        <div
+          className="assignments-triple-content__public-page"
+          style={{ gridRow: `span ${row}`, gridColumn: `span ${col}` }}
+        >
           <h1 className="title__public-page">Unsubmited</h1>
           {assignments.length > 0
             ? filteredData
@@ -154,7 +160,10 @@ export default function Assignments() {
                 ))
             : null}
         </div>
-        <div className="assignments-triple-content__public-page">
+        <div
+          className="assignments-triple-content__public-page"
+          style={{ gridRow: `span ${row}`, gridColumn: `span ${col}` }}
+        >
           <h1 className="title__public-page">All Assignment</h1>
           {assignments.length > 0
             ? filteredData
@@ -169,7 +178,10 @@ export default function Assignments() {
                 ))
             : null}
         </div>
-        <div className="assignments-triple-content__public-page">
+        <div
+          className="assignments-triple-content__public-page"
+          style={{ gridRow: `span ${row}`, gridColumn: `span ${col}` }}
+        >
           <h1 className="title__public-page">Submited</h1>
           {assignments.length > 0
             ? filteredData
@@ -183,6 +195,7 @@ export default function Assignments() {
                     key={item?.assignment_number}
                     item={item}
                     userRole={userRole}
+                    span
                   />
                 ))
             : null}

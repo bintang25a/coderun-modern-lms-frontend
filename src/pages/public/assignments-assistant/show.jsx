@@ -11,7 +11,7 @@ import { Link, useOutletContext, useParams } from "react-router-dom";
 import Toolbar from "../../../components/container/Toolbar";
 import ManageDataField from "../../../components/action/ManageDataField";
 import CodeOutput from "../../../components/grid-item/CodeOutput";
-import CodeInput from "../../../components/grid-item/CodeInput";
+import CodeInput from "../../../components/grid-item/CodeDisplay";
 import serviceSocket from "../../../_services/socket";
 import { showAssignment } from "../../../_services/assignments";
 import { showSubmission } from "../../../_services/submissions";
@@ -25,6 +25,7 @@ import {
 
 import "../public.css";
 import { toggleModal } from "../../../_utilities/toggleModal";
+import CodeDisplay from "../../../components/grid-item/CodeDisplay";
 
 export default function AssignmentAsistant() {
   const {
@@ -432,10 +433,9 @@ export default function AssignmentAsistant() {
         </section>
       </nav>
       <div className="content-container__public-page">
-        <CodeInput
+        <CodeDisplay
           value={codeData?.code}
           handleChange={handleCodeChange}
-          span={2}
           fontSize={fs}
         >
           <div className="toolbar__public-page">
@@ -504,7 +504,7 @@ export default function AssignmentAsistant() {
               <FaDownload /> Download All
             </button>
           </div>
-        </CodeInput>
+        </CodeDisplay>
 
         <Toolbar id={3}>
           <div

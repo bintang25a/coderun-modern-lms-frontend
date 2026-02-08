@@ -22,7 +22,7 @@ import Profile from "./pages/auth/Profile";
 import AssignmentAsistant from "./pages/public/assignments-assistant/show";
 import AssignmentsAssistant from "./pages/public/assignments-assistant";
 import Materials from "./pages/public/materials";
-import MaterialsAssistant from "./pages/public/materials/MaterialsAsistant";
+import MaterialsAssistant from "./pages/public/material-assistant";
 
 export default function App() {
   const role = localStorage.getItem("user")?.role;

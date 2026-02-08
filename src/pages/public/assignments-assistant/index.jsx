@@ -6,20 +6,35 @@ import {
 } from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
-import { createAssignment } from "../../../_services/assignments";
+import {
+  createAssignment,
+  deleteAssignment,
+  showAssignment,
+  updateAssignment,
+} from "../../../_services/assignments";
 import { showClassroom } from "../../../_services/classrooms";
 import ItemList from "../../../components/grid-item/ItemList";
 import "../public.css";
+import { toggleModal } from "../../../_utilities/toggleModal";
+import ManageDataField from "../../../components/action/ManageDataField";
+import Overlay from "../../../components/container/Overlay";
 
 export default function AssignmentsAssistant() {
-  const { switchLoading, setAllertSetting, refreshData, state, userRole } =
-    useOutletContext();
+  const {
+    switchLoading,
+    setAllertSetting,
+    setConfirmSetting,
+    refreshData,
+    state,
+    userRole,
+  } = useOutletContext();
 
   const initialForm = {
     title: "",
     description: "",
     startAt: "",
     endAt: "",
+    support_link: "",
     overtime: false,
   };
 
@@ -58,14 +73,8 @@ export default function AssignmentsAssistant() {
   }, []);
 
   useEffect(() => {
-    // const tempuser = state?.data || {};
-    // const class_code = localStorage.getItem("class_code");
-    // const tempClassroom = tempuser?.assists?.find(
-    //   (classroom) => classroom?.class_code === class_code
-    // );
-    // const tempAssignments = tempClassroom?.assignments;
-    // setClassroom(tempClassroom);
-    // setAssignments(tempAssignments);
+    setClassroom(state?.classroom);
+    setAssignments(state?.classroom?.assignments);
   }, [state]);
 
   const handleChange = (e) => {
@@ -88,6 +97,8 @@ export default function AssignmentsAssistant() {
 
   const handleSubmit = async () => {
     switchLoading(true);
+
+    console.log(formData);
 
     const hasFile = Object.values(formData).some(
       (value) => value instanceof File
@@ -132,6 +143,124 @@ export default function AssignmentsAssistant() {
     }
   };
 
+  const [modal, setModal] = useState({});
+  const handleEdit = async (e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const assignmentFields = [
+      {
+        name: "title",
+        label: "Title",
+        placeholder: "Tugas Pertemuan 2",
+      },
+      {
+        name: "answer",
+        label: "Answer Key",
+        placeholder: "Kerjakan dengan testcase sebagai berikut",
+        type: "file",
+      },
+      {
+        name: "startAt",
+        label: "Start At",
+        type: "date",
+      },
+      {
+        name: "endAt",
+        label: "End At",
+        type: "date",
+      },
+      {
+        name: "overtime",
+        label: "Allow Overtime",
+        type: "select",
+        options: [
+          {
+            label: "True",
+            value: true,
+          },
+          {
+            label: "False",
+            value: false,
+          },
+        ],
+      },
+      {
+        name: "support_link",
+        label: "Support Link",
+      },
+      {
+        name: "description",
+        label: "Description",
+        placeholder: "Kerjakan dengan testcase sebagai berikut",
+      },
+    ];
+
+    const submit = async (id, data) => {
+      await updateAssignment(classroom?.class_code, id, data);
+    };
+
+    const [assignmentData] = await Promise.all([
+      showAssignment(classroom?.class_code, id),
+    ]);
+
+    toggleModal({
+      title: `EDIT ASSIGNMENT: ${id}`,
+      message: "Update assignment success",
+      isActive: true,
+      isEdit: true,
+      itemId: "assignment_number",
+      item: assignmentData,
+      fields: assignmentFields,
+      onSubmit: submit,
+      setModal,
+    });
+  };
+  const handleDelete = async (e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const confirmUser = () => {
+      return new Promise((resolve) => {
+        setConfirmSetting({
+          isActive: true,
+          title: `DELETE ASSIGNMENT: ${id}`,
+          message: `ARE YOU SURE?`,
+
+          onConfirm: () => resolve(true),
+          onCancel: () => resolve(false),
+        });
+      });
+    };
+
+    try {
+      const isConfirmed = await confirmUser();
+
+      if (!isConfirmed) return;
+
+      switchLoading(true);
+
+      await deleteAssignment(classroom?.class_code, id);
+      await refreshData();
+
+      setAllertSetting({
+        isActive: true,
+        message: "Delete data success",
+        isSuccess: true,
+      });
+    } catch (error) {
+      setAllertSetting({
+        isActive: true,
+        message: error,
+        isSuccess: false,
+      });
+    } finally {
+      switchLoading(false);
+
+      setConfirmSetting((prev) => ({ ...prev, isActive: false }));
+    }
+  };
+
   return (
     <main className="__public-page">
       <nav className="navbar__public-page">
@@ -170,7 +299,10 @@ export default function AssignmentsAssistant() {
         </section>
       </nav>
       <div className="content-container__public-page">
-        <div className="assignments-left-content__public-page span-2__public-page">
+        <div
+          className="assignments-left-content__public-page"
+          style={{ gridRow: `span 3`, gridColumn: `span 2` }}
+        >
           <input
             type="text"
             name="title"
@@ -276,8 +408,29 @@ export default function AssignmentsAssistant() {
           settings={{ id: "assignment_number", show: "title" }}
           link={`${userRole}/classrooms/assignments`}
           disabled={false}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
       </div>
+
+      {modal.isActive ? (
+        <Overlay isActive={modal?.isActive} onClose={modal?.onClose}>
+          <ManageDataField
+            title={modal?.title}
+            message={modal?.message}
+            isEdit={modal?.isEdit}
+            item_id={modal?.itemId}
+            item={modal?.item}
+            type={modal?.type}
+            fields={modal?.fields}
+            onClose={modal?.onClose}
+            onSubmit={modal?.onSubmit}
+            loadingSetting={switchLoading}
+            allertSetting={setAllertSetting}
+            refreshData={refreshData}
+          />
+        </Overlay>
+      ) : null}
     </main>
   );
 }

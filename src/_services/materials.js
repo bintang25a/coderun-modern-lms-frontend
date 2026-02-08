@@ -16,6 +16,15 @@ export const showMaterial = async (material_number) => {
   }
 };
 
+export const fileMaterial = async (material_number) => {
+  const res = await API.get(`/materials/${material_number}/file`, {
+    responseType: "blob",
+  });
+
+  const blobUrl = URL.createObjectURL(res.data);
+  return blobUrl;
+};
+
 export const createMaterial = async (data) => {
   try {
     const response = await API.post("/materials", data);

@@ -323,6 +323,7 @@ export default function Submission() {
             </div>
           </Toolbar>
         </div>
+
         <div className="submissions-right-content__public-page">
           <div className="output-field__public-page">
             <pre>

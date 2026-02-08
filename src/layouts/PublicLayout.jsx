@@ -12,6 +12,7 @@ import { showUser } from "../_services/users";
 import { showAssignment } from "../_services/assignments";
 import LoadingMessage from "../components/screen/LoadingMessage";
 import { showClassroom } from "../_services/classrooms";
+import { getMaterials } from "../_services/materials";
 
 export default function PublicLayout() {
   const [user, setUser] = useState({});
@@ -57,8 +58,19 @@ export default function PublicLayout() {
   const refreshData = async () => {
     switchLoading(true);
 
+    // ===== USER INFO =====
     const tempUser = localStorage.getItem("user");
     const fixUser = tempUser ? JSON.parse(tempUser) : "";
+    const class_code = localStorage.getItem("class_code");
+
+    // ===== KONDISI =====
+    const isAssignment = pathname.startsWith(
+      `/${userRole}/classrooms/assignments/`
+    );
+    const isMaterials = pathname.startsWith(
+      `/${userRole}/classrooms/materials/`
+    );
+    const isClassroom = pathname.startsWith(`/${userRole}/classrooms/`);
 
     if ((pageName === "classrooms" || pageName === "assignments") && !paramId) {
       const [user] = await Promise.all([showUser(fixUser?.uid)]);
@@ -67,9 +79,7 @@ export default function PublicLayout() {
         user: user,
         classrooms: user?.role === "Asisten" ? user?.assists : user?.classrooms,
       });
-    } else if (pathname.startsWith("/assistant/classrooms/assignments/")) {
-      const class_code = localStorage.getItem("class_code");
-
+    } else if (isAssignment) {
       const [assignmentData] = await Promise.all([
         showAssignment(class_code, id),
       ]);
@@ -78,9 +88,18 @@ export default function PublicLayout() {
         assignment: assignmentData,
         submissions: assignmentData?.submissions,
       });
-    } else if (pathname.startsWith(`/${userRole}/classrooms/`)) {
-      const class_code = localStorage.getItem("class_code");
+    } else if (isMaterials) {
+      const [classroomData, materialsData] = await Promise.all([
+        showClassroom(class_code),
+        getMaterials(),
+      ]);
 
+      setState({
+        classroom: classroomData,
+        materials: materialsData,
+        classMaterials: classroomData?.materials,
+      });
+    } else if (isClassroom) {
       const [classroomData] = await Promise.all([showClassroom(class_code)]);
 
       setState({
