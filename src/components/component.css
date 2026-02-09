@@ -333,8 +333,9 @@
   }
 }
 
-.code-input__grid-item-component,
+.code-display__grid-item-component,
 .code-output__grid-item-component,
+.file-display__grid-item-component,
 .item-list__grid-item-component,
 .blank-grid__container-component {
   height: 100%;
@@ -349,14 +350,15 @@
 
   position: relative;
 }
-.code-input__grid-item-component {
+.code-display__grid-item-component,
+.file-display__grid-item-component {
   padding: var(--px-16);
 
   display: flex;
   flex-direction: column;
   gap: var(--px-12);
 
-  .input-field__grid-item-component {
+  .display-field__grid-item-component {
     flex: 1;
     width: 100%;
 
@@ -435,21 +437,21 @@
     }
   }
 }
-.code-input__grid-item-component,
+.code-display__grid-item-component,
 .code-output__grid-item-component {
-  .input-field__grid-item-component.fs-small__grid-item-component,
+  .display-field__grid-item-component.fs-small__grid-item-component,
   .output-field__grid-item-component
     .pre__grid-item-component
     .code__grid-item-component.fs-small__grid-item-component {
     font-size: var(--fs-3);
   }
-  .input-field__grid-item-component.fs-medium__grid-item-component,
+  .display-field__grid-item-component.fs-medium__grid-item-component,
   .output-field__grid-item-component
     .pre__grid-item-component
     .code__grid-item-component.fs-medium__grid-item-component {
     font-size: var(--fs-5);
   }
-  .input-field__grid-item-component.fs-big__grid-item-component,
+  .display-field__grid-item-component.fs-big__grid-item-component,
   .output-field__grid-item-component
     .pre__grid-item-component
     .code__grid-item-component.fs-big__grid-item-component {

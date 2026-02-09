@@ -21,14 +21,14 @@ const CodeDisplay = ({
 
   return (
     <div
-      className={`code-input__grid-item-component`}
+      className={`code-display__grid-item-component`}
       style={{
         gridRow: `span ${row}`,
         gridColumn: `span ${col}`,
       }}
     >
       <textarea
-        className={`input-field__grid-item-component ${classSize()}`}
+        className={`display-field__grid-item-component ${classSize()}`}
         name="code"
         id="code"
         value={value}

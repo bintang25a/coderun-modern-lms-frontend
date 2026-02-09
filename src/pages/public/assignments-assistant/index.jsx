@@ -130,7 +130,7 @@ export default function AssignmentsAssistant() {
       payload = formData;
     }
 
-    const class_code = localStorage.getItem("class_code");
+    const class_code = sessionStorage.getItem("class_code");
 
     try {
       await createAssignment(class_code, payload);

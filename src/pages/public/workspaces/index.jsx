@@ -26,6 +26,9 @@ import FileDisplay from "../../../components/grid-item/FileDisplay";
 import { toggleModal } from "../../../_utilities/toggleModal";
 import Overlay from "../../../components/container/Overlay";
 import { getAssignments } from "../../../_services/assignments";
+import CodeDisplay from "../../../components/grid-item/CodeDisplay";
+import CodeOutput from "../../../components/grid-item/CodeOutput";
+import AssignmentInput from "../../../components/grid-item/AssignmentInput";
 
 export default function Workspaces() {
   const {
@@ -38,29 +41,18 @@ export default function Workspaces() {
   } = useOutletContext();
   const navigate = useNavigate();
 
+  const [classrooms, setClassrooms] = useState({});
   const [materials, setMaterials] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [submissions, setSubmissions] = useState([]);
-  const [blob, setBlob] = useState(null);
-
-  const [classroom, setClassroom] = useState({});
   const [classMaterials, setClassMaterials] = useState([]);
+  const [blob, setBlob] = useState(null);
+  const [list, setList] = useState({});
 
   useEffect(() => {
     switchLoading(true);
 
     const fetchData = async () => {
-      const class_code = sessionStorage.getItem("class_code");
-
-      if (!class_code) {
-        setAllertSetting({
-          isActive: true,
-          message: "Classroom not found, returning...",
-        });
-
-        return navigate(`/${userRole}/classrooms`);
-      }
-
       try {
         // ===== FETCH CLASSROOMS =====
         const classrooms =
@@ -76,42 +68,50 @@ export default function Workspaces() {
           classroomsQuery ? getClassrooms(classroomsQuery) : null,
         ]);
 
-        // ===== FETCH MATERIALS & ASSIGNMENTS =====
-        const tempMaterials = classroomsData?.flatMap(
-          (classroom) => classroom.materials || []
-        );
+        setClassrooms(classroomsData);
+
+        // ===== FETCH ASSIGNMENTS =====
         const tempAssignments = classroomsData?.flatMap(
           (classroom) => classroom.assignments || []
         );
 
-        const materialsParams = new URLSearchParams();
         const assignmentsParams = new URLSearchParams();
 
-        tempMaterials?.forEach((i) => {
-          materialsParams.append("material_number", i?.material_number);
-        });
         tempAssignments?.forEach((i) => {
           assignmentsParams.append("assignment_number", i?.assignment_number);
         });
 
-        const materialsQuery = materialsParams.toString();
         const assignmentsQuery = assignmentsParams.toString();
 
-        const [materialsData, assignmentsData] = await Promise.all([
-          materialsQuery ? getMaterials(materialsQuery) : null,
+        const [assignmentsData] = await Promise.all([
           assignmentsQuery
-            ? getAssignments(class_code, assignmentsQuery)
+            ? getAssignments("class_code", assignmentsQuery)
             : null,
         ]);
 
-        // ===== TAKE SUBMISSIONS =====
+        // ===== TAKE SUBMISSIONS & MATERIALS =====
+        const classMaterialsData = classroomsData?.flatMap(
+          (classroom) => classroom?.materials || []
+        );
         const submissionsData = assignmentsData?.flatMap(
           (assignment) => assignment?.submissions || []
         );
 
-        setMaterials(materialsData);
         setAssignments(assignmentsData);
+        setClassMaterials(classMaterialsData);
         setSubmissions(submissionsData);
+
+        setList({
+          title: "Material List",
+          id: "material_number",
+          show: "title",
+          data: classMaterialsData,
+        });
+
+        // ===== FETCH MATERIALS FOR TRANSFER SETUP =====
+        const [materialsData] = await Promise.all([getMaterials()]);
+
+        setMaterials(materialsData);
       } catch (error) {
         console.log(error);
 
@@ -132,6 +132,14 @@ export default function Workspaces() {
     setMaterials(state?.materials);
     setAssignments(state?.classroom);
   }, [state]);
+
+  const [classCode, setClassCode] = useState(false);
+  const handleClassroomChange = (e) => {
+    const { value } = e.target;
+
+    sessionStorage.setItem("class_code", value);
+    setClassCode(value);
+  };
 
   const handleAction = async (id) => {
     const file = await fileMaterial(id);
@@ -191,91 +199,134 @@ export default function Workspaces() {
     <main className="__public-page">
       <nav className="navbar__public-page">
         <section className="left__public-page">
-          <Link
-            to={`/${userRole}/classrooms/${classroom?.class_code}`}
-            className="title__public-page"
-          >
-            Workspaces
-          </Link>
+          <div className="title__public-page">Workspaces</div>
         </section>
         <section className="right__public-page">
-          {userRole === "assistant" ? (
-            <div className="action__public-page">
-              <button
-                to={`/${userRole}/classrooms/materials`}
-                className="button__public-page active"
-              >
-                <FaBookOpen /> Materials
-              </button>
-              <button
-                to={`/${userRole}/classrooms/assignments`}
-                className="button__public-page"
-              >
-                <FaClipboardList /> Assignments
-              </button>
-              <button
-                to={`/${userRole}/classrooms/assignments`}
-                className="button__public-page"
-              >
-                <FaClipboardUser /> Submissions
-              </button>
-            </div>
-          ) : (
-            <h1 className="title__public-page">
-              Tutor/Asisten:{" "}
-              <span>
-                {classroom?.assistants?.map((a) => a?.name).join("/")}
-              </span>
-            </h1>
-          )}
+          <div className="action__public-page">
+            <select
+              className="button__public-page"
+              onChange={handleClassroomChange}
+            >
+              <option value="">Select Classrooms</option>
+              {classrooms?.length > 0 ? (
+                classrooms?.map((c) => (
+                  <option key={c?.class_code} value={c?.class_code}>
+                    {c?.name}
+                  </option>
+                ))
+              ) : (
+                <option value="">No Classrooms</option>
+              )}
+            </select>
+            <button
+              className={`button__public-page ${
+                list?.id === "material_number" ? "active" : ""
+              }`}
+              onClick={() =>
+                setList({
+                  title: "Material List",
+                  id: "material_number",
+                  show: "title",
+                  data: classMaterials,
+                })
+              }
+            >
+              <FaBookOpen /> Materials
+            </button>
+            <button
+              className={`button__public-page ${
+                list?.id === "assignment_number" ? "active" : ""
+              }`}
+              onClick={() =>
+                setList({
+                  title: "Assignment List",
+                  id: "assignment_number",
+                  show: "title",
+                  data: assignments,
+                })
+              }
+            >
+              <FaClipboardList /> Assignments
+            </button>
+            <button
+              to={`/${userRole}/classrooms/assignments`}
+              className={`button__public-page ${
+                list?.id === "submission_number" ? "active" : ""
+              }`}
+              onClick={() =>
+                setList({
+                  title: "Submission List",
+                  id: "submission_number",
+                  show: "student_uid",
+                  data: submissions,
+                })
+              }
+            >
+              <FaClipboardUser /> Submissions
+            </button>
+          </div>
         </section>
       </nav>
 
       <div className="content-container__public-page">
-        <FileDisplay output={blob}>
-          <div className="toolbar__public-page">
-            <button
-              title="Add Material"
-              className="toolbar-item__public-page"
-              name="submission_number"
-              id="submission_number"
-              onClick={() =>
-                toggleModal({
-                  isActive: true,
-                  title: "ADD MATERIAL",
-                  message: "Add material success",
-                  fields: fields,
-                  onSubmit: handleAdd,
-                  setModal,
-                })
-              }
-            >
-              Add <FaBookOpen />
-            </button>
-            <button
-              title="Take Material"
-              className="toolbar-item__public-page"
-              name="submission_number"
-              id="submission_number"
-              onClick={() =>
-                toggleModal({
-                  mode: "transfer",
-                  isActive: true,
-                  title: "TAKE AVAILABLE MATERIAL",
-                  onAdd: createClassMaterial,
-                  onRemove: deleteClassMaterial,
-                  setModal,
-                })
-              }
-            >
-              Take <FaRightLeft />
-            </button>
-          </div>
-        </FileDisplay>
+        {list?.id === "material_number" ? (
+          <FileDisplay output={blob}>
+            <div className="toolbar__public-page">
+              <button
+                title="Add Material"
+                className="toolbar-item__public-page"
+                name="submission_number"
+                id="submission_number"
+                disabled={!classCode}
+                onClick={() =>
+                  toggleModal({
+                    isActive: true,
+                    title: "ADD MATERIAL",
+                    message: "Add material success",
+                    fields: fields,
+                    onSubmit: handleAdd,
+                    setModal,
+                  })
+                }
+              >
+                Add <FaBookOpen />
+              </button>
+              <button
+                title="Take Material"
+                className="toolbar-item__public-page"
+                name="submission_number"
+                id="submission_number"
+                disabled={!classCode}
+                onClick={() =>
+                  toggleModal({
+                    mode: "transfer",
+                    isActive: true,
+                    title: "TAKE AVAILABLE MATERIAL",
+                    onAdd: createClassMaterial,
+                    onRemove: deleteClassMaterial,
+                    setModal,
+                  })
+                }
+              >
+                Take <FaRightLeft />
+              </button>
+            </div>
+          </FileDisplay>
+        ) : null}
+
+        {list?.id === "assignment_number" ? <AssignmentInput /> : null}
+
+        {list?.id === "submission_number" ? (
+          <>
+            <CodeDisplay span={{ row: 3, col: 1 }} />
+            <CodeOutput />
+          </>
+        ) : null}
+
         <ItemList
-          title={"Material List"}
-          items={submissions}
-          settings={{ id: "submission_number", show: "student_uid" }}
+          title={list?.title}
+          items={list?.data}
+          settings={{ id: list?.id, show: list?.show }}
           link={`${userRole}/classrooms/materials/`}
           disabled={true}
           onAction={handleAction}
@@ -304,7 +355,7 @@ export default function Workspaces() {
           <Overlay isActive={modal?.isActive} onClose={modal?.onClose}>
             <ManageDataTransfer
               title={modal?.title}
-              parent_id={classroom?.class_code}
+              parent_id={classCode}
               item_id={"material_number"}
               item_show={"title"}
               inBoxItems={classMaterials}

@@ -122,7 +122,7 @@ export default function AdminLayout() {
 
   return (
     <>
-      <Sidebar role={user.role} />
+      <Sidebar role={userRole} />
       <div className="layout">
         <Header
           user={user}
