@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Papa from "papaparse";
-import { FaPaperPlane, FaCircleXmark } from "react-icons/fa6";
+import { FaPaperPlane } from "react-icons/fa6";
 
 const AddDataCsv = ({
   onClose,

@@ -1,8 +1,8 @@
 import API from "../_api";
 import message from "../_utilities/errorMessage";
 
-export const getMaterials = async () => {
-  const { data: response } = await API.get("/materials");
+export const getMaterials = async (query = "") => {
+  const { data: response } = await API.get(`/materials?${query}`);
   return response.data;
 };
 

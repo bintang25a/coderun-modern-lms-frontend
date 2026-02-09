@@ -23,6 +23,7 @@ import AssignmentAsistant from "./pages/public/assignments-assistant/show";
 import AssignmentsAssistant from "./pages/public/assignments-assistant";
 import Materials from "./pages/public/materials";
 import MaterialsAssistant from "./pages/public/material-assistant";
+import Workspaces from "./pages/public/workspaces";
 
 export default function App() {
   const role = localStorage.getItem("user")?.role;
@@ -83,7 +84,7 @@ export default function App() {
             <Route
               path="classrooms/materials"
               element={<MaterialsAssistant />}
-            ></Route>
+            />
             <Route
               path="classrooms/assignments"
               element={<AssignmentsAssistant />}
@@ -93,8 +94,7 @@ export default function App() {
               element={<AssignmentAsistant />}
             />
             <Route path="classrooms/:id" element={<Classroom />} />
-            <Route path="materials" element={<Materials />} />
-            <Route path="assignments" element={<Assignments />} />
+            <Route path="workspaces" element={<Workspaces />} />
           </Route>
         </Route>
 

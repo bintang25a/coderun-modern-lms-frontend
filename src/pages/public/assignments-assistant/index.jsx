@@ -5,7 +5,7 @@ import {
   FaPaperPlane,
 } from "react-icons/fa6";
 import { useEffect, useState } from "react";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import {
   createAssignment,
   deleteAssignment,
@@ -21,12 +21,12 @@ import Overlay from "../../../components/container/Overlay";
 
 export default function AssignmentsAssistant() {
   const {
+    state,
+    userRole,
+    refreshData,
     switchLoading,
     setAllertSetting,
     setConfirmSetting,
-    refreshData,
-    state,
-    userRole,
   } = useOutletContext();
 
   const initialForm = {
@@ -43,9 +43,22 @@ export default function AssignmentsAssistant() {
   const [formData, setFormData] = useState(initialForm);
   const [fileSelected, setFileSelected] = useState("");
 
+  const navigate = useNavigate();
+
   useEffect(() => {
+    switchLoading(true);
+
     const fetchData = async () => {
-      const class_code = localStorage.getItem("class_code");
+      const class_code = sessionStorage.getItem("class_code");
+
+      if (!class_code) {
+        setAllertSetting({
+          isActive: true,
+          message: "Classroom not found, returning...",
+        });
+
+        return navigate(`/${userRole}/classrooms`);
+      }
 
       try {
         switchLoading(true);
@@ -70,11 +83,11 @@ export default function AssignmentsAssistant() {
 
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [userRole]);
 
   useEffect(() => {
     setClassroom(state?.classroom);
-    setAssignments(state?.classroom?.assignments);
+    setAssignments(state?.assignments);
   }, [state]);
 
   const handleChange = (e) => {
@@ -144,6 +157,7 @@ export default function AssignmentsAssistant() {
   };
 
   const [modal, setModal] = useState({});
+
   const handleEdit = async (e, id) => {
     e.preventDefault();
     e.stopPropagation();
@@ -216,6 +230,7 @@ export default function AssignmentsAssistant() {
       setModal,
     });
   };
+
   const handleDelete = async (e, id) => {
     e.preventDefault();
     e.stopPropagation();

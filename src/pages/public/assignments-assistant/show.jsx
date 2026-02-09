@@ -7,11 +7,12 @@ import {
   AiOutlineFileSearch,
   AiOutlineFontSize,
 } from "react-icons/ai";
-import { Link, useOutletContext, useParams } from "react-router-dom";
-import Toolbar from "../../../components/container/Toolbar";
-import ManageDataField from "../../../components/action/ManageDataField";
-import CodeOutput from "../../../components/grid-item/CodeOutput";
-import CodeInput from "../../../components/grid-item/CodeDisplay";
+import {
+  Link,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from "react-router-dom";
 import serviceSocket from "../../../_services/socket";
 import { showAssignment } from "../../../_services/assignments";
 import { showSubmission } from "../../../_services/submissions";
@@ -22,21 +23,25 @@ import {
   grade,
   runCode,
 } from "../../../_services/actions";
-
-import "../public.css";
 import { toggleModal } from "../../../_utilities/toggleModal";
+import Toolbar from "../../../components/container/Toolbar";
+import ManageDataField from "../../../components/action/ManageDataField";
+import CodeOutput from "../../../components/grid-item/CodeOutput";
 import CodeDisplay from "../../../components/grid-item/CodeDisplay";
+import "../public.css";
 
 export default function AssignmentAsistant() {
   const {
+    state,
+    userUid,
+    userRole,
+    refreshData,
     switchLoading,
     setLoadingSetting,
     setAllertSetting,
-    state,
-    userRole,
-    refreshData,
   } = useOutletContext();
 
+  const navigate = useNavigate();
   const { id } = useParams();
 
   // ===== INISIASI DATA AWAL =====
@@ -45,29 +50,39 @@ export default function AssignmentAsistant() {
   const [submission, setSubmission] = useState({});
 
   useEffect(() => {
+    switchLoading(true);
+
     const fetchData = async () => {
-      const class_code = localStorage.getItem("class_code");
+      const class_code = sessionStorage.getItem("class_code");
+
+      if (!class_code) {
+        setAllertSetting({
+          isActive: true,
+          message: "Classroom not found, returning...",
+        });
+
+        return navigate(`/${userRole}/classrooms`);
+      }
 
       try {
-        switchLoading(true);
-
         const [assignmentData] = await Promise.all([
           showAssignment(class_code, id),
         ]);
 
-        localStorage.setItem(
+        sessionStorage.setItem(
           "assignment_number",
           assignmentData?.assignment_number
         );
-        localStorage.setItem(
+        sessionStorage.setItem(
           "submission_number",
           assignmentData?.submissions[0]?.submission_number
         );
 
         setAssignment(assignmentData);
         setSubmissions(assignmentData?.submissions);
+        setSubmission(assignmentData?.submissions[0]);
       } catch (error) {
-        console.log("Fetch error:", error);
+        console.log(error);
 
         setAllertSetting({
           isActive: true,
@@ -80,19 +95,17 @@ export default function AssignmentAsistant() {
 
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [userRole]);
 
   useEffect(() => {
     setAssignment(state?.assignment);
     setSubmissions(state?.submissions);
+    setSubmission(state?.submission);
   }, [state]);
 
   // ===== AUTO GRADE FETCH PROGRES =====
   useEffect(() => {
-    let user = localStorage.getItem("user");
-    user = user ? JSON.parse(user) : {};
-
-    serviceSocket.on(`autoGrade-${user?.uid}`, (data) => {
+    serviceSocket.on(`autoGrade-${userUid}`, (data) => {
       setLoadingSetting((prev) => ({
         ...prev,
         isActive: true,
@@ -103,7 +116,7 @@ export default function AssignmentAsistant() {
       }));
     });
 
-    serviceSocket.on(`autoGrade-${user?.uid}-done`, () => {
+    serviceSocket.on(`autoGrade-${userUid}-done`, () => {
       setLoadingSetting({
         isActive: false,
         messages: [],
@@ -111,8 +124,8 @@ export default function AssignmentAsistant() {
     });
 
     return () => {
-      serviceSocket.off(`autoGrade-${user?.uid}`);
-      serviceSocket.off(`autoGrade-${user?.uid}-done`);
+      serviceSocket.off(`autoGrade-${userUid}`);
+      serviceSocket.off(`autoGrade-${userUid}-done`);
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -195,7 +208,7 @@ export default function AssignmentAsistant() {
       if (name === "submission_number") {
         const [submissionData] = await Promise.all([showSubmission(id, value)]);
 
-        localStorage.setItem(
+        sessionStorage.setItem(
           "submission_number",
           submissionData?.submission_number
         );

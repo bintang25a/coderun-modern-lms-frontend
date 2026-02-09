@@ -1,37 +1,33 @@
 import { FaChalkboardUser, FaMagnifyingGlass } from "react-icons/fa6";
-import "../public.css";
-
-import { showUser } from "../../../_services/users";
-import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { createStudent } from "../../../_services/studentClassroom";
 import ManageDataField from "../../../components/action/ManageDataField";
 import BlankGrid from "../../../components/container/BlankGrid";
+import "../public.css";
 
 export default function Classrooms() {
-  const { switchLoading, setAllertSetting, refreshData, state, userRole } =
-    useOutletContext();
+  const {
+    state,
+    user,
+    userRole,
+    refreshData,
+    switchLoading,
+    setAllertSetting,
+  } = useOutletContext();
 
-  const [user, setUser] = useState({});
   const [classrooms, setClassrooms] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [modal, setModal] = useState({});
 
   useEffect(() => {
+    switchLoading(true);
+
     const fetchData = async () => {
-      const tempUser = localStorage.getItem("user");
-      const fixUser = tempUser ? JSON.parse(tempUser) : "";
-
       try {
-        switchLoading(true);
-
-        const [userData] = await Promise.all([showUser(fixUser?.uid)]);
         const classroomsData =
-          fixUser?.role === "Asisten"
-            ? userData?.assists
-            : userData?.classrooms;
+          userRole === "assistant" ? user?.assists : user?.classrooms;
 
-        setUser(userData);
         setClassrooms(classroomsData);
       } catch (error) {
         console.log("Fetch error:", error);
@@ -48,10 +44,9 @@ export default function Classrooms() {
 
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    setUser(state?.user);
     setClassrooms(state?.classrooms);
   }, [state]);
 

@@ -1,8 +1,8 @@
 import API from "../_api";
 import message from "../_utilities/errorMessage";
 
-export const getUsers = async () => {
-  const { data: response } = await API.get("/users");
+export const getUsers = async (query = "") => {
+  const { data: response } = await API.get(`/users?${query}`);
   return response.data;
 };
 

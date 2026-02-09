@@ -8,6 +8,7 @@ import {
   FaClipboardCheck,
   FaUsers,
   FaHouse,
+  FaBriefcase,
 } from "react-icons/fa6";
 
 const MainGeneral = ({ role }) => {
@@ -23,14 +24,29 @@ const MainGeneral = ({ role }) => {
         <FaChalkboard className="icon__layout-component" />
         Classroom
       </Link>
-      <Link to={`/${path}/materials`} className="nav-list__layout-component">
-        <FaBookOpen className="icon__layout-component" />
-        Material
-      </Link>
-      <Link to={`/${path}/assignments`} className="nav-list__layout-component">
-        <FaClipboardList className="icon__layout-component" />
-        Assignment
-      </Link>
+      {path === "assistant" ? (
+        <Link to={`/${path}/workspaces`} className="nav-list__layout-component">
+          <FaBriefcase className="icon__layout-component" />
+          Workspace
+        </Link>
+      ) : (
+        <>
+          <Link
+            to={`/${path}/materials`}
+            className="nav-list__layout-component"
+          >
+            <FaBookOpen className="icon__layout-component" />
+            Material
+          </Link>
+          <Link
+            to={`/${path}/assignments`}
+            className="nav-list__layout-component"
+          >
+            <FaClipboardList className="icon__layout-component" />
+            Assignment
+          </Link>
+        </>
+      )}
       <Link to={"../profile"} className="nav-list__layout-component">
         <FaUser className="icon__layout-component" />
         Profile

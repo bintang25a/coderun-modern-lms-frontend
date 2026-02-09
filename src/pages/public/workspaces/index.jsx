@@ -1,7 +1,11 @@
+import {
+  FaBookOpen,
+  FaClipboardList,
+  FaClipboardUser,
+  FaRightLeft,
+} from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
-import { FaBookOpen, FaClipboardList, FaRightLeft } from "react-icons/fa6";
-import { showClassroom } from "../../../_services/classrooms";
 import {
   createMaterial,
   fileMaterial,
@@ -9,34 +13,44 @@ import {
   showMaterial,
   updateMaterial,
 } from "../../../_services/materials";
+import { getClassrooms } from "../../../_services/classrooms";
+import ManageDataField from "../../../components/action/ManageDataField";
+import ManageDataTransfer from "../../../components/action/ManageDataTransfer";
+import "../public.css";
 import {
   createClassMaterial,
   deleteClassMaterial,
 } from "../../../_services/materialClassroom";
-import { toggleModal } from "../../../_utilities/toggleModal";
-import Overlay from "../../../components/container/Overlay";
 import ItemList from "../../../components/grid-item/ItemList";
 import FileDisplay from "../../../components/grid-item/FileDisplay";
-import ManageDataField from "../../../components/action/ManageDataField";
-import ManageDataTransfer from "../../../components/action/ManageDataTransfer";
-import "../public.css";
+import { toggleModal } from "../../../_utilities/toggleModal";
+import Overlay from "../../../components/container/Overlay";
+import { getAssignments } from "../../../_services/assignments";
 
-export default function MaterialsAssistant() {
-  const { state, userRole, refreshData, switchLoading, setAllertSetting } =
-    useOutletContext();
+export default function Workspaces() {
+  const {
+    state,
+    user,
+    userRole,
+    refreshData,
+    switchLoading,
+    setAllertSetting,
+  } = useOutletContext();
   const navigate = useNavigate();
 
-  const [classroom, setClassroom] = useState({});
   const [materials, setMaterials] = useState([]);
-  const [classMaterials, setClassMaterials] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+  const [submissions, setSubmissions] = useState([]);
   const [blob, setBlob] = useState(null);
+
+  const [classroom, setClassroom] = useState({});
+  const [classMaterials, setClassMaterials] = useState([]);
 
   useEffect(() => {
     switchLoading(true);
 
     const fetchData = async () => {
       const class_code = sessionStorage.getItem("class_code");
-      const file = sessionStorage.getItem("blob");
 
       if (!class_code) {
         setAllertSetting({
@@ -48,18 +62,56 @@ export default function MaterialsAssistant() {
       }
 
       try {
-        const [classroomsData, materialsData] = await Promise.all([
-          showClassroom(class_code),
-          getMaterials(),
+        // ===== FETCH CLASSROOMS =====
+        const classrooms =
+          userRole === "assistant" ? user?.assists : user?.classrooms;
+
+        const classroomsParams = new URLSearchParams();
+        classrooms?.forEach((i) => {
+          classroomsParams.append("class_code", i?.class_code);
+        });
+
+        const classroomsQuery = classroomsParams.toString();
+        const [classroomsData] = await Promise.all([
+          classroomsQuery ? getClassrooms(classroomsQuery) : null,
         ]);
 
-        const classMaterialsData = classroomsData?.materials;
+        // ===== FETCH MATERIALS & ASSIGNMENTS =====
+        const tempMaterials = classroomsData?.flatMap(
+          (classroom) => classroom.materials || []
+        );
+        const tempAssignments = classroomsData?.flatMap(
+          (classroom) => classroom.assignments || []
+        );
 
-        if (file) setBlob(file);
+        const materialsParams = new URLSearchParams();
+        const assignmentsParams = new URLSearchParams();
 
-        setClassroom(classroomsData);
+        tempMaterials?.forEach((i) => {
+          materialsParams.append("material_number", i?.material_number);
+        });
+        tempAssignments?.forEach((i) => {
+          assignmentsParams.append("assignment_number", i?.assignment_number);
+        });
+
+        const materialsQuery = materialsParams.toString();
+        const assignmentsQuery = assignmentsParams.toString();
+
+        const [materialsData, assignmentsData] = await Promise.all([
+          materialsQuery ? getMaterials(materialsQuery) : null,
+          assignmentsQuery
+            ? getAssignments(class_code, assignmentsQuery)
+            : null,
+        ]);
+
+        // ===== TAKE SUBMISSIONS =====
+        const submissionsData = assignmentsData?.flatMap(
+          (assignment) => assignment?.submissions || []
+        );
+
         setMaterials(materialsData);
-        setClassMaterials(classMaterialsData);
+        setAssignments(assignmentsData);
+        setSubmissions(submissionsData);
       } catch (error) {
         console.log(error);
 
@@ -74,12 +126,11 @@ export default function MaterialsAssistant() {
 
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    setClassroom(state?.classroom);
     setMaterials(state?.materials);
-    setClassMaterials(state?.classroom?.materials);
+    setAssignments(state?.classroom);
   }, [state]);
 
   const handleAction = async (id) => {
@@ -144,24 +195,30 @@ export default function MaterialsAssistant() {
             to={`/${userRole}/classrooms/${classroom?.class_code}`}
             className="title__public-page"
           >
-            {classroom?.name}
+            Workspaces
           </Link>
         </section>
         <section className="right__public-page">
           {userRole === "assistant" ? (
             <div className="action__public-page">
-              <Link
+              <button
                 to={`/${userRole}/classrooms/materials`}
                 className="button__public-page active"
               >
                 <FaBookOpen /> Materials
-              </Link>
-              <Link
+              </button>
+              <button
                 to={`/${userRole}/classrooms/assignments`}
                 className="button__public-page"
               >
                 <FaClipboardList /> Assignments
-              </Link>
+              </button>
+              <button
+                to={`/${userRole}/classrooms/assignments`}
+                className="button__public-page"
+              >
+                <FaClipboardUser /> Submissions
+              </button>
             </div>
           ) : (
             <h1 className="title__public-page">
@@ -217,8 +274,8 @@ export default function MaterialsAssistant() {
         </FileDisplay>
         <ItemList
           title={"Material List"}
-          items={classMaterials}
-          settings={{ id: "material_number", show: "title" }}
+          items={submissions}
+          settings={{ id: "submission_number", show: "student_uid" }}
           link={`${userRole}/classrooms/materials/`}
           disabled={true}
           onAction={handleAction}

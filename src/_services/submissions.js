@@ -1,8 +1,10 @@
 import API from "../_api";
 import message from "../_utilities/errorMessage";
 
-export const getSubmissions = async (assignment_number = "admin") => {
-  const { data: response } = await API.get(`/submissions/${assignment_number}`);
+export const getSubmissions = async (assignment_number, query = "") => {
+  const { data: response } = await API.get(
+    `/submissions/${assignment_number}?${query}`
+  );
   return response.data;
 };
 
@@ -59,3 +61,14 @@ export const deleteSubmission = async (
     throw message(error);
   }
 };
+
+// const response = await axios.get('/api/file', { responseType: 'blob' });
+// const blob = response.data;
+
+// if (blob.type === 'application/pdf') {
+//   // Tampilkan di PDF viewer
+// } else {
+//   // Baca sebagai teks untuk file kode
+//   const codeText = await blob.text();
+//   console.log(codeText);
+// }

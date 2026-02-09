@@ -12,7 +12,7 @@ import ItemList from "../../../components/grid-item/ItemList";
 import { fileMaterial } from "../../../_services/materials";
 
 export default function Classroom() {
-  const { switchLoading, setAllertSetting, state, userRole } =
+  const { state, userRole, switchLoading, setAllertSetting } =
     useOutletContext();
 
   const { id } = useParams();
@@ -21,17 +21,17 @@ export default function Classroom() {
   const [classroom, setClassroom] = useState([]);
 
   useEffect(() => {
+    switchLoading(true);
+
     const fetchData = async () => {
       try {
-        switchLoading(true);
-
         const [classroomData] = await Promise.all([showClassroom(id)]);
 
-        localStorage.setItem("class_code", classroomData?.class_code);
+        sessionStorage.setItem("class_code", classroomData?.class_code);
 
         setClassroom(classroomData);
       } catch (error) {
-        console.log("Fetch error:", error);
+        console.log(error);
 
         setAllertSetting({
           isActive: true,
@@ -48,13 +48,13 @@ export default function Classroom() {
   }, []);
 
   useEffect(() => {
-    setClassroom(state?.classroom || {});
+    setClassroom(state?.classroom);
   }, [state]);
 
   const handleAction = async (id) => {
     const file = await fileMaterial(id);
 
-    localStorage.setItem("blob", file);
+    sessionStorage.setItem("blob", file);
 
     navigate(`/${userRole}/classrooms/materials`);
   };

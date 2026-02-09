@@ -1,8 +1,10 @@
 import API from "../_api";
 import message from "../_utilities/errorMessage";
 
-export const getAssignments = async (class_code = "admin") => {
-  const { data: response } = await API.get(`/assignments/${class_code}`);
+export const getAssignments = async (class_code, query = "") => {
+  const { data: response } = await API.get(
+    `/assignments/${class_code}?${query}`
+  );
   return response.data;
 };
 
