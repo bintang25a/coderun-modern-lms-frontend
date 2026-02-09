@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa6";
 
 const MainGeneral = ({ role }) => {
-  const path = role == "Asisten" ? "assistant" : "student";
+  const path = role == "assistant" ? "assistant" : "student";
 
   return (
     <main className="content__layout-component">
@@ -98,7 +98,7 @@ const Sidebar = ({ role }) => {
           </h2>
         </div>
       </header>
-      {role === "Admin" ? <MainAdmin /> : <MainGeneral role={role} />}
+      {role === "admin" ? <MainAdmin /> : <MainGeneral role={role} />}
     </aside>
   );
 };

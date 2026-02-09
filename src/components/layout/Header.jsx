@@ -54,7 +54,7 @@ const Header = ({ user, handleLogout, handleRefresh, role }) => {
       <section className="right__layout-component">
         <div className="text__layout-component">
           <h1 className="name__layout-component">{user.name}</h1>
-          <span className="role__layout-component">{user.role}</span>
+          <span className="role__layout-component">{role}</span>
         </div>
         <div className="image__layout-component">B</div>
       </section>

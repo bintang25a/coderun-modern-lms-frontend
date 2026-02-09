@@ -214,7 +214,7 @@ export default function PublicLayout() {
 
   return (
     <>
-      <Sidebar role={user.role} />
+      <Sidebar role={userRole} />
       <div className="layout">
         <Header
           user={user}
