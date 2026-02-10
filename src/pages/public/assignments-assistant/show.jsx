@@ -15,7 +15,7 @@ import {
 } from "react-router-dom";
 import serviceSocket from "../../../_services/socket";
 import { showAssignment } from "../../../_services/assignments";
-import { showSubmission } from "../../../_services/submissions";
+import { fileSubmission, showSubmission } from "../../../_services/submissions";
 import { createTestcase, deleteTestcase } from "../../../_services/testcases";
 import {
   autoGrade,
@@ -29,6 +29,8 @@ import ManageDataField from "../../../components/action/ManageDataField";
 import CodeOutput from "../../../components/grid-item/CodeOutput";
 import CodeDisplay from "../../../components/grid-item/CodeDisplay";
 import "../public.css";
+import CodeToolbar from "../../../components/action/CodeToolbar";
+import TestcaseToolbar from "../../../components/action/TestcaseToolbar";
 
 export default function AssignmentAsistant() {
   const {
@@ -103,6 +105,145 @@ export default function AssignmentAsistant() {
     setSubmission(state?.submission);
   }, [state]);
 
+  // ===== SELECT STUDENT =====
+  const [blob, setBlob] = useState(null);
+  const [output, setOutput] = useState("");
+  const [formCode, setFormCode] = useState({ timeLimit: 500 });
+  const [gradeData, setGradeData] = useState(submission?.grade || 0);
+
+  const handleStudentChange = async (e) => {
+    const { value } = e.target;
+
+    const [submissionData, fileData] = await Promise.all([
+      showSubmission(id, value),
+      fileSubmission(id, value),
+    ]);
+
+    const ext = submission.answer.slice(submission.answer.lastIndexOf("."));
+
+    const lang = {
+      ".c": "c",
+      ".cpp": "cpp",
+      ".java": "java",
+      ".py": "python",
+      ".pdf": "pdf",
+    };
+
+    setSubmission(submissionData);
+    setGradeData(submissionData?.grade || 0);
+
+    fileData.type === "application/pdf"
+      ? setBlob(URL.createObjectURL(fileData))
+      : setFormCode({
+          ...formCode,
+          code: await fileData.text(),
+          language: lang[ext],
+        });
+  };
+
+  // ===== SETUP RUN CODE =====
+  const handleCodeChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormCode({
+      ...formCode,
+      [name]: value,
+    });
+  };
+
+  const handleRunCode = async () => {
+    try {
+      const response = await runCode(formCode);
+
+      setOutput(response.output);
+    } catch (error) {
+      console.log(error);
+
+      setAllertSetting({
+        isActive: true,
+        message: error,
+      });
+    }
+  };
+
+  const handleRunExample = async () => {
+    const formData = {
+      ...formCode,
+      codePath: assignment?.answer_key,
+    };
+
+    try {
+      const response = await runCode(formData);
+
+      setOutput(response.output);
+    } catch (error) {
+      console.log(error);
+
+      setAllertSetting({
+        isActive: true,
+        message: error,
+      });
+    }
+  };
+
+  const [fs, setFs] = useState(0);
+  const handleFontSize = () => {
+    if (fs === 3) {
+      setFs(0);
+    } else {
+      setFs(fs + 1);
+    }
+  };
+
+  // ===== SETUP TESTCASE =====
+  const [modal, setModal] = useState({});
+
+  const handleTestcaseSubmit = async (data) => {
+    await createTestcase(id, data);
+  };
+
+  const handleTestcaseDelete = async (data) => {
+    await deleteTestcase(id, data?.testcase_number);
+  };
+
+  // ===== SETUP GRADE SUBMISSION =====
+  const handleGradeChange = (e) => {
+    const { value } = e.target;
+
+    setGradeData(value);
+  };
+
+  const handleGradeSubmit = async () => {
+    switchLoading(true);
+
+    const formData = {
+      submission_number: submission?.submission_number,
+      assignment_number: id,
+      grade: gradeData,
+    };
+
+    try {
+      await grade(formData);
+
+      setAllertSetting({
+        isActive: true,
+        message: "Grade saved",
+        isSuccess: true,
+      });
+
+      refreshData();
+    } catch (error) {
+      console.log(error);
+
+      setAllertSetting({
+        isActive: true,
+        message: error,
+      });
+    } finally {
+      setTimeout(() => switchLoading(false), 100);
+    }
+  };
+
   // ===== AUTO GRADE FETCH PROGRES =====
   useEffect(() => {
     serviceSocket.on(`autoGrade-${userUid}`, (data) => {
@@ -135,139 +276,7 @@ export default function AssignmentAsistant() {
     setLoadingSetting({ messages: [], isActive: data });
   };
 
-  // ===== SETUP RUN CODE =====
-  const [codeData, setCodeData] = useState({ timeLimit: 500, input: "" });
-  const [output, setOutput] = useState("");
-
-  const handleCodeChange = (e) => {
-    const { name, value } = e.target;
-
-    if (name === "timeLimit") {
-      setCodeData({
-        ...codeData,
-        [name]: Number(value),
-      });
-    } else {
-      setCodeData({
-        ...codeData,
-        [name]: value,
-      });
-    }
-  };
-
-  const handleCodeSubmit = async () => {
-    const formData = {
-      ...codeData,
-    };
-
-    try {
-      const response = await runCode(formData);
-
-      setOutput(response.output);
-    } catch (error) {
-      console.log(error);
-
-      setAllertSetting({
-        isActive: true,
-        message: error,
-      });
-    }
-  };
-
-  const handleRunAnswer = async () => {
-    const formData = {
-      ...codeData,
-      codePath: assignment?.answer_key,
-    };
-
-    try {
-      const response = await runCode(formData);
-
-      setOutput(response.output);
-    } catch (error) {
-      console.log(error);
-
-      setAllertSetting({
-        isActive: true,
-        message: error,
-      });
-    }
-  };
-
-  // ===== SETUP GRADE SUBMISSION =====
-  const [gradeData, setGradeData] = useState({ grade: 0 });
-
-  const handleSubmissionChange = async (e) => {
-    const { name, value } = e.target;
-
-    const id = assignment?.assignment_number;
-
-    try {
-      switchLoading(true);
-
-      if (name === "submission_number") {
-        const [submissionData] = await Promise.all([showSubmission(id, value)]);
-
-        sessionStorage.setItem(
-          "submission_number",
-          submissionData?.submission_number
-        );
-
-        setCodeData({ ...codeData, code: submissionData?.code });
-        setSubmission(submissionData);
-
-        setGradeData({
-          ...gradeData,
-          grade: submissionData?.grade || 0,
-          assignment_number: id,
-          [name]: value,
-        });
-      } else {
-        setGradeData({
-          ...gradeData,
-          assignment_number: id,
-          [name]: value,
-        });
-      }
-    } catch (error) {
-      console.log(error);
-
-      setAllertSetting({
-        isActive: true,
-        message: error,
-      });
-    } finally {
-      switchLoading(false);
-    }
-  };
-
-  // ===== SUBMISSION SUBMIT GRADE =====
-  const handleSubmitGrade = async () => {
-    switchLoading(true);
-
-    try {
-      await grade(gradeData);
-
-      setAllertSetting({
-        isActive: true,
-        message: `${submission?.student?.name} - ${submission?.student_uid}\nScore ${gradeData?.grade} Saved`,
-        isSuccess: true,
-      });
-
-      await refreshData();
-    } catch (error) {
-      console.log(error);
-
-      setAllertSetting({
-        isActive: true,
-        message: error,
-      });
-    } finally {
-      switchLoading(false);
-    }
-  };
-
-  // ===== SUBMISSION DOWNLOAD =====
+  // ===== SETUP DOWNLOAD =====
   const handleDownload = async () => {
     try {
       await downloadSubmissions(assignment?.assignment_number);
@@ -281,61 +290,11 @@ export default function AssignmentAsistant() {
     }
   };
 
-  // ===== SETUP TOOLBAR =====
-  const [modal, setModal] = useState({});
-  const [isVertical, setIsVertical] = useState([false]);
-
-  // ===== SETUP TESTCASE =====
-  const inputFields = [
-    {
-      name: "name",
-      label: "Name testcase",
-      placeholder: "Testcase name (not space)",
-    },
-    {
-      type: "number",
-      name: "weight",
-      label: "Testcase weight",
-      placeholder: "2",
-    },
-    {
-      name: "input",
-      label: "Input testcase",
-      placeholder: "Input your testcase here: 5 3 8 c",
-    },
-  ];
-
-  const viewFields = assignment?.testcases?.map((t) => ({
-    name: t?.name,
-    label: t?.name,
-    value: `Weight(${t?.weight}) : input[${t?.input}]`,
-  }));
-
-  const deleteFields = [
-    {
-      type: "select",
-      label: "Select testcase",
-      name: "testcase_number",
-      options: assignment?.testcases?.map((t) => ({
-        label: `Weight(${t?.weight}) : input[${t?.input}]`,
-        value: t?.testcase_number,
-      })),
-    },
-  ];
-
-  const handleTestcaseSubmit = async (data) => {
-    await createTestcase(assignment?.assignment_number, data);
-  };
-
-  const handleTestcaseDelete = async (data) => {
-    await deleteTestcase(assignment?.assignment_number, data?.testcase_number);
-  };
-
   // ===== SETUP AUTO GRADE =====
   const autoGradeForm = {
     assignment_number: assignment?.assignment_number,
-    language: codeData?.language,
-    timeLimit: Math.max(Number(codeData?.timeLimit), 2000),
+    language: formCode?.language,
+    timeLimit: Math.max(Number(formCode?.timeLimit), 2000),
     test_cases: assignment?.testcases,
     testcasesLength: `${assignment?.testcases?.length} Testcases`,
     concurrency: 3,
@@ -406,16 +365,6 @@ export default function AssignmentAsistant() {
     await autoGrade(data);
   };
 
-  // ===== CODE FONT SIZE =====
-  const [fs, setFs] = useState(0);
-  const handleFontSize = () => {
-    if (fs === 3) {
-      setFs(0);
-    } else {
-      setFs(fs + 1);
-    }
-  };
-
   return (
     <main className="__public-page">
       <nav className="navbar__public-page">
@@ -446,227 +395,103 @@ export default function AssignmentAsistant() {
         </section>
       </nav>
       <div className="content-container__public-page">
-        <CodeDisplay
-          value={codeData?.code}
-          handleChange={handleCodeChange}
-          fontSize={fs}
-        >
-          <div className="toolbar__public-page">
-            <select
-              className="toolbar-item__public-page"
-              name="submission_number"
-              id="submission_number"
-              onChange={handleSubmissionChange}
-            >
-              <option value="">
-                {submissions?.length > 0 ? "Select Students" : "No Students"}
-              </option>
-              {submissions?.map((s) => (
-                <option key={s.submission_number} value={s.submission_number}>
-                  {`[${s?.grade ? s?.grade : "--"}] 
-                  ${s?.student?.name} - ${s?.student_uid}`}
+        {!blob ? (
+          <CodeDisplay
+            value={formCode?.code}
+            handleChange={handleCodeChange}
+            fontSize={fs}
+          >
+            <div className="toolbar__public-page">
+              <select
+                className="toolbar-item__public-page"
+                name="submission_number"
+                id="submission_number"
+                onChange={handleStudentChange}
+              >
+                <option value="">
+                  {submissions?.length > 0 ? "Select Students" : "No Students"}
                 </option>
-              ))}
-            </select>
-            <input
-              className="toolbar-item__public-page"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              name="grade"
-              id="grade"
-              placeholder="Grade"
-              value={gradeData?.grade}
-              onChange={handleSubmissionChange}
-              disabled={!submission}
-            />
-            <button
-              className="toolbar-item__public-page"
-              onClick={handleSubmitGrade}
-              disabled={
-                !gradeData?.grade || gradeData?.grade === submission?.grade
-              }
-            >
-              <FaSave />
-              Save Grade
-            </button>
-            <button
-              className="toolbar-item__public-page"
-              disabled={assignment?.testcases?.length === 0}
-              onClick={() =>
-                toggleModal({
-                  title: "AUTO GRADE SETUP",
-                  message: "Auto Grade Finish",
-                  isActive: true,
-                  isEdit: true,
-                  isVertical: false,
-                  item: autoGradeForm,
-                  fields: autoGradeFields,
-                  onSubmit: submitAutoGrade,
-                  setModal,
-                })
-              }
-            >
-              <FaBrain /> Auto Grade
-            </button>
-            <button
-              className="toolbar-item__public-page"
-              onClick={handleDownload}
-              disabled={assignment?.submissions?.length === 0}
-            >
-              <FaDownload /> Download All
-            </button>
-          </div>
-        </CodeDisplay>
+                {submissions?.map((s) => (
+                  <option key={s.submission_number} value={s.submission_number}>
+                    {`[${s?.grade ? s?.grade : "--"}] 
+                  ${s?.student?.name} - ${s?.student_uid}`}
+                  </option>
+                ))}
+              </select>
+              <input
+                className="toolbar-item__public-page"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                name="grade"
+                id="grade"
+                placeholder="Grade"
+                value={gradeData}
+                onChange={handleGradeChange}
+                disabled={!submission}
+              />
+              <button
+                className="toolbar-item__public-page"
+                onClick={handleGradeSubmit}
+                disabled={!gradeData || gradeData === submission?.grade}
+              >
+                <FaSave />
+                Save Grade
+              </button>
+              <button
+                className="toolbar-item__public-page"
+                disabled={assignment?.testcases?.length === 0}
+                onClick={() =>
+                  toggleModal({
+                    title: "AUTO GRADE SETUP",
+                    message: "Auto Grade Finish",
+                    isActive: true,
+                    isEdit: true,
+                    isVertical: false,
+                    item: autoGradeForm,
+                    fields: autoGradeFields,
+                    onSubmit: submitAutoGrade,
+                    setModal,
+                  })
+                }
+              >
+                <FaBrain /> Auto Grade
+              </button>
+              <button
+                className="toolbar-item__public-page"
+                onClick={handleDownload}
+                disabled={assignment?.submissions?.length === 0}
+              >
+                <FaDownload /> Download All
+              </button>
+            </div>
+          </CodeDisplay>
+        ) : (
+          <FileDisplay output={blob} />
+        )}
 
         <Toolbar id={3}>
-          <div
-            className={`toolbar__public-page ${
-              isVertical[3] ? "vertical" : ""
-            }`}
-          >
-            <div
-              title="Rotate"
-              className="toolbar-item__public-page"
-              onClick={() => {
-                setIsVertical((prev) => {
-                  const newState = [...prev];
-                  newState[3] = !prev[3];
-                  return newState;
-                });
-              }}
-            >
-              <FaRotate className="icon__public-page" />
-            </div>
-            <select
-              className="toolbar-item__public-page"
-              name="language"
-              id="language"
-              value={codeData?.language}
-              onChange={handleCodeChange}
-            >
-              <option value="">Lang</option>
-              <option value="c">C</option>
-              <option value="cpp">C++</option>
-              <option value="java">Java</option>
-              <option value="python">Python</option>
-            </select>
-            <select
-              className="toolbar-item__public-page"
-              name="timeLimit"
-              id="timeLimit"
-              value={codeData?.timeLimit}
-              onChange={handleCodeChange}
-            >
-              <option value="500">0.5s</option>
-              <option value="1000">1s</option>
-              <option value="2000">2s</option>
-              <option value="5000">5s</option>
-              <option value="10000">10s</option>
-            </select>
-            <button
-              className="toolbar-item__public-page"
-              onClick={handleCodeSubmit}
-              disabled={codeData?.language === "pdf"}
-            >
-              <FaCode />
-              Run Code
-            </button>
-            <button
-              className="toolbar-item__public-page"
-              onClick={handleRunAnswer}
-              disabled={codeData?.language === "pdf"}
-            >
-              <FaCode />
-              Run Example
-            </button>
-            <button
-              title="Font Size"
-              className="toolbar-item__public-page button__public-page"
-              onClick={handleFontSize}
-            >
-              <AiOutlineFontSize />
-            </button>
-          </div>
+          <CodeToolbar
+            formData={formCode}
+            setFormData={setFormCode}
+            runCode={handleRunCode}
+            runExample={handleRunExample}
+            fontSize={handleFontSize}
+          />
         </Toolbar>
 
         <Toolbar id={2}>
-          <div
-            className={`toolbar__public-page ${
-              isVertical[2] ? "vertical" : ""
-            }`}
-          >
-            <div
-              title="Rotate"
-              className="toolbar-item__public-page"
-              onClick={() => {
-                setIsVertical((prev) => {
-                  const newState = [...prev];
-                  newState[2] = !prev[2];
-                  return newState;
-                });
-              }}
-            >
-              <FaRotate className="icon__public-page" />
-            </div>
-            <button
-              title="Add Testcase"
-              className="toolbar-item__public-page button__public-page"
-              onClick={() =>
-                toggleModal({
-                  title: "ADD TESTCASE",
-                  message: "Create testcase success",
-                  isActive: true,
-                  type: "Testcase",
-                  fields: inputFields,
-                  onSubmit: handleTestcaseSubmit,
-                  setModal,
-                })
-              }
-            >
-              <AiOutlineFileAdd />
-            </button>
-            <button
-              title="View Testcase"
-              className="toolbar-item__public-page button__public-page"
-              disabled={assignment?.testcases?.length === 0}
-              onClick={() =>
-                toggleModal({
-                  title: "VIEW TESTCASE",
-                  isActive: true,
-                  isView: true,
-                  isVertical: true,
-                  type: "Testcase",
-                  fields: viewFields,
-                  setModal,
-                })
-              }
-            >
-              <AiOutlineFileSearch />
-            </button>
-            <button
-              title="Delete Testcase"
-              className="toolbar-item__public-page button__public-page"
-              disabled={assignment?.testcases?.length === 0}
-              onClick={() =>
-                toggleModal({
-                  title: "DELETE TESTCASE",
-                  message: "Remove testcase success",
-                  isActive: true,
-                  type: "Testcase",
-                  fields: deleteFields,
-                  onSubmit: handleTestcaseDelete,
-                  setModal,
-                })
-              }
-            >
-              <AiOutlineDelete />
-            </button>
-          </div>
+          <TestcaseToolbar
+            testcases={assignment?.testcases}
+            toggleModal={toggleModal}
+            setModal={setModal}
+            onSubmit={handleTestcaseSubmit}
+            onDelete={handleTestcaseDelete}
+          />
         </Toolbar>
 
         <CodeOutput
-          value={codeData?.input}
+          value={formCode?.input}
           handleChange={handleCodeChange}
           output={output}
           fontSize={fs}

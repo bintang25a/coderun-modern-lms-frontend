@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaCircleXmark, FaPaperPlane } from "react-icons/fa6";
+import { FaPaperPlane } from "react-icons/fa6";
 import { FaChevronCircleDown } from "react-icons/fa";
 import "../component.css";
 

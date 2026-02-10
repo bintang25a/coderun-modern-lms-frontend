@@ -28,7 +28,6 @@ import Overlay from "../../../components/container/Overlay";
 import {
   createAssignment,
   getAssignments,
-  showAssignment,
   updateAssignment,
 } from "../../../_services/assignments";
 import CodeDisplay from "../../../components/grid-item/CodeDisplay";
@@ -454,7 +453,12 @@ export default function Workspaces() {
 
         {list?.id === "submission_number" ? (
           <>
-            <CodeDisplay value={code} span={{ row: 3, col: 2 }} />
+            <CodeDisplay
+              value={code}
+              // handleChange={handleCodeChange}
+              // fontSize={fs}
+              span={{ row: 3, col: 2 }}
+            ></CodeDisplay>
             <Toolbar isResize={true}>
               <CodeOutput />
             </Toolbar>
@@ -478,7 +482,7 @@ export default function Workspaces() {
               message={modal?.message}
               isEdit={modal?.isEdit}
               fields={modal?.fields}
-              item_id={"material_number"}
+              item_id={modal?.itemId}
               item={modal?.item}
               onSubmit={modal?.onSubmit}
               onClose={modal?.onClose}
