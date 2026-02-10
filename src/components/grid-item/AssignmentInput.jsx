@@ -1,10 +1,91 @@
+import { useState } from "react";
 import { FaFileCode, FaPaperPlane } from "react-icons/fa6";
 
-const AssignmentInput = ({formData, handleChange, fileSelected, setFormData, handleSubmit}) => {
+const AssignmentInput = ({
+  class_code,
+  refreshData,
+  switchLoading,
+  setAllertSetting,
+  createAssignment,
+  span = { row: 3, col: 2 },
+}) => {
+  const initialForm = {
+    title: "",
+    description: "",
+    startAt: "",
+    endAt: "",
+    support_link: "",
+    overtime: false,
+  };
+
+  const [formData, setFormData] = useState(initialForm);
+  const [fileSelected, setFileSelected] = useState(false);
+
+  const handleChange = (e) => {
+    const { files, name, value } = e.target;
+
+    if (name === "answer") {
+      setFileSelected(files[0]?.name);
+
+      setFormData({
+        ...formData,
+        [name]: files[0],
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const handleSubmit = async () => {
+    switchLoading(true);
+
+    const hasFile = Object.values(formData).some(
+      (value) => value instanceof File
+    );
+
+    let payload;
+
+    if (hasFile) {
+      payload = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          payload.append(key, value);
+        }
+      });
+    } else {
+      payload = formData;
+    }
+    try {
+      await createAssignment(class_code, payload);
+
+      setAllertSetting({
+        isActive: true,
+        message: `Create assignment success`,
+        isSuccess: true,
+      });
+
+      setFormData(initialForm);
+      setFileSelected("");
+
+      await refreshData();
+    } catch (error) {
+      setAllertSetting({
+        isActive: true,
+        message: error,
+        isSuccess: false,
+      });
+    } finally {
+      switchLoading(false);
+    }
+  };
+
   return (
     <div
       className="assignments-left-content__public-page"
-      style={{ gridRow: `span 3`, gridColumn: `span 2` }}
+      style={{ gridRow: `span ${span?.row}`, gridColumn: `span ${span?.col}` }}
     >
       <input
         type="text"
@@ -99,9 +180,10 @@ const AssignmentInput = ({formData, handleChange, fileSelected, setFormData, han
         <button
           className="toolbar-item__public-page button__public-page"
           onClick={handleSubmit}
+          disabled={!class_code}
         >
           <FaPaperPlane /> Submit Assignment
-        </button>{" "}
+        </button>
       </div>
     </div>
   );

@@ -111,8 +111,6 @@ export default function AssignmentsAssistant() {
   const handleSubmit = async () => {
     switchLoading(true);
 
-    console.log(formData);
-
     const hasFile = Object.values(formData).some(
       (value) => value instanceof File
     );

@@ -20,6 +20,24 @@ export const showSubmission = async (assignment_number, submission_number) => {
   }
 };
 
+export const fileSubmission = async (assignment_number, submission_number) => {
+  try {
+    const response = await API.get(
+      `/submissions/${assignment_number}/${submission_number}/file`,
+      {
+        responseType: "blob",
+      }
+    );
+
+    const blob = response.data;
+
+    return blob;
+  } catch (error) {
+    console.error(message(error));
+    throw message(error);
+  }
+};
+
 export const createSubmission = async (assignment_number, data) => {
   try {
     const response = await API.post(`/submissions/${assignment_number}`, data);
@@ -61,14 +79,3 @@ export const deleteSubmission = async (
     throw message(error);
   }
 };
-
-// const response = await axios.get('/api/file', { responseType: 'blob' });
-// const blob = response.data;
-
-// if (blob.type === 'application/pdf') {
-//   // Tampilkan di PDF viewer
-// } else {
-//   // Baca sebagai teks untuk file kode
-//   const codeText = await blob.text();
-//   console.log(codeText);
-// }

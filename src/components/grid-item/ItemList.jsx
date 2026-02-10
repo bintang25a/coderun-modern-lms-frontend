@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 import { Link } from "react-router-dom";
 
@@ -14,8 +15,10 @@ const ItemList = ({
 }) => {
   const isAction = !!onAction;
 
+  const [activeId, setActiveId] = useState("");
   const action = (id) => {
-    localStorage.setItem([settings?.id], id);
+    setActiveId(id);
+    sessionStorage.setItem([settings?.id], id);
 
     if (disabled && isAction) {
       onAction(id);
@@ -40,7 +43,11 @@ const ItemList = ({
           <Component
             key={item[settings?.id]}
             to={`/${link}/${item[settings?.id]}`}
-            className="item__grid-item-component"
+            className={`item__grid-item-component ${
+              item[settings?.id] === activeId
+                ? "active__grid-item-component"
+                : ""
+            }`}
             onClick={() => action(item[settings?.id])}
             disabled={disabled && !isAction}
           >

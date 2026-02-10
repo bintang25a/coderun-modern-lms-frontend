@@ -385,6 +385,9 @@
 
   padding-bottom: var(--px-80);
 
+  width: 100%;
+  height: 100%;
+
   overflow-y: auto;
 
   .output-field__grid-item-component {
@@ -529,6 +532,13 @@
         border-color: var(--btn-info);
         color: var(--white);
       }
+    }
+  }
+  .item__grid-item-component.active__grid-item-component {
+    background-color: var(--primary);
+
+    .show__grid-item-component {
+      color: var(--white);
     }
   }
   .item__grid-item-component:not(:disabled):hover {
@@ -797,6 +807,7 @@
 
   width: fit-content;
   min-width: fit-content;
+  height: fit-content;
 
   padding: var(--px-8);
 
@@ -812,7 +823,21 @@
   user-select: none;
   touch-action: none;
 
+  overflow: hidden;
   transition: none !important;
+
+  .toolbar-resizer__container-component {
+    width: var(--px-16);
+    height: var(--px-16);
+
+    background-color: var(--primary);
+
+    cursor: nwse-resize;
+    position: absolute;
+
+    right: 0;
+    bottom: 0;
+  }
 
   .icon-close__container-component {
     position: absolute;

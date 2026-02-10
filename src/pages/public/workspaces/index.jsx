@@ -5,7 +5,7 @@ import {
   FaRightLeft,
 } from "react-icons/fa6";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import {
   createMaterial,
   fileMaterial,
@@ -25,10 +25,17 @@ import ItemList from "../../../components/grid-item/ItemList";
 import FileDisplay from "../../../components/grid-item/FileDisplay";
 import { toggleModal } from "../../../_utilities/toggleModal";
 import Overlay from "../../../components/container/Overlay";
-import { getAssignments } from "../../../_services/assignments";
+import {
+  createAssignment,
+  getAssignments,
+  showAssignment,
+  updateAssignment,
+} from "../../../_services/assignments";
 import CodeDisplay from "../../../components/grid-item/CodeDisplay";
 import CodeOutput from "../../../components/grid-item/CodeOutput";
 import AssignmentInput from "../../../components/grid-item/AssignmentInput";
+import Toolbar from "../../../components/container/Toolbar";
+import { fileSubmission, showSubmission } from "../../../_services/submissions";
 
 export default function Workspaces() {
   const {
@@ -39,14 +46,12 @@ export default function Workspaces() {
     switchLoading,
     setAllertSetting,
   } = useOutletContext();
-  const navigate = useNavigate();
 
   const [classrooms, setClassrooms] = useState({});
   const [materials, setMaterials] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [classMaterials, setClassMaterials] = useState([]);
-  const [blob, setBlob] = useState(null);
   const [list, setList] = useState({});
 
   useEffect(() => {
@@ -90,8 +95,11 @@ export default function Workspaces() {
         ]);
 
         // ===== TAKE SUBMISSIONS & MATERIALS =====
-        const classMaterialsData = classroomsData?.flatMap(
-          (classroom) => classroom?.materials || []
+        const classMaterialsData = classroomsData?.flatMap((classroom) =>
+          (classroom?.materials || []).map((material) => ({
+            ...material,
+            class_code: classroom?.class_code,
+          }))
         );
         const submissionsData = assignmentsData?.flatMap(
           (assignment) => assignment?.submissions || []
@@ -106,6 +114,7 @@ export default function Workspaces() {
           id: "material_number",
           show: "title",
           data: classMaterialsData,
+          edit: handleMaterialEdit,
         });
 
         // ===== FETCH MATERIALS FOR TRANSFER SETUP =====
@@ -133,23 +142,64 @@ export default function Workspaces() {
     setAssignments(state?.classroom);
   }, [state]);
 
-  const [classCode, setClassCode] = useState(false);
+  const [classCode, setClassCode] = useState("");
   const handleClassroomChange = (e) => {
     const { value } = e.target;
 
     sessionStorage.setItem("class_code", value);
     setClassCode(value);
+
+    if (list?.id === "assignment_number") {
+      setList({
+        title: "Assignment List",
+        id: "assignment_number",
+        show: "title",
+        data: !value
+          ? assignments
+          : assignments?.filter((a) => a?.class_code === value),
+        edit: handleAssignmentEdit,
+      });
+    }
   };
+
+  // ===== HANDLE LIST CLICK =====
+  const [submission, setSubmission] = useState({});
+  const [blob, setBlob] = useState(null);
+  const [code, setCode] = useState("");
 
   const handleAction = async (id) => {
-    const file = await fileMaterial(id);
+    try {
+      if (list?.id === "material_number") {
+        const file = await fileMaterial(id);
 
-    setBlob(file);
+        setBlob(file);
+      } else if (list?.id === "submission_number") {
+        const temp = submissions?.find((s) => s?.submission_number === id);
+
+        const [submissionData, fileData] = await Promise.all([
+          showSubmission(temp?.assignment_number, id),
+          fileSubmission(temp?.assignment_number, id),
+        ]);
+
+        setSubmission(submissionData);
+        fileData.type === "application/pdf"
+          ? setBlob(URL.createObjectURL(fileData))
+          : setCode(await fileData.text());
+      }
+    } catch (error) {
+      console.log(error);
+
+      setAllertSetting({
+        isActive: true,
+        message: error,
+      });
+    }
   };
 
+  // ===== HANDLE MATERIAL =====
   const [modal, setModal] = useState({});
 
-  const fields = [
+  const materialFields = [
     {
       name: "title",
       label: "Title",
@@ -162,17 +212,17 @@ export default function Workspaces() {
     },
   ];
 
-  const handleAdd = async (data) => {
+  const handleMaterialAdd = async (data) => {
     try {
       const res = await createMaterial(data);
 
-      await createClassMaterial(classroom?.class_code, res?.data);
+      await createClassMaterial(classCode, res?.data);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleEdit = async (e, id) => {
+  const handleMaterialEdit = async (e, id) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -189,7 +239,81 @@ export default function Workspaces() {
       isEdit: true,
       itemId: "material_number",
       item: materialData,
-      fields: fields,
+      fields: materialFields,
+      onSubmit: submit,
+      setModal,
+    });
+  };
+
+  // ===== HANDLE ASSIGNMENT =====
+  const handleAssignmentEdit = async (e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const assignmentFields = [
+      {
+        name: "title",
+        label: "Title",
+        placeholder: "Tugas Pertemuan 2",
+      },
+      {
+        name: "answer",
+        label: "Answer Key",
+        placeholder: "Kerjakan dengan testcase sebagai berikut",
+        type: "file",
+      },
+      {
+        name: "startAt",
+        label: "Start At",
+        type: "date",
+      },
+      {
+        name: "endAt",
+        label: "End At",
+        type: "date",
+      },
+      {
+        name: "overtime",
+        label: "Allow Overtime",
+        type: "select",
+        options: [
+          {
+            label: "True",
+            value: true,
+          },
+          {
+            label: "False",
+            value: false,
+          },
+        ],
+      },
+      {
+        name: "support_link",
+        label: "Support Link",
+      },
+      {
+        name: "description",
+        label: "Description",
+        placeholder: "Kerjakan dengan testcase sebagai berikut",
+      },
+    ];
+
+    const assignmentData = assignments?.find(
+      (a) => a?.assignment_number === id
+    );
+
+    const submit = async (id, data) => {
+      await updateAssignment(assignmentData?.class_code, id, data);
+    };
+
+    toggleModal({
+      title: `EDIT ASSIGNMENT: ${id}`,
+      message: "Update assignment success",
+      isActive: true,
+      isEdit: true,
+      itemId: "assignment_number",
+      item: assignmentData,
+      fields: assignmentFields,
       onSubmit: submit,
       setModal,
     });
@@ -207,7 +331,7 @@ export default function Workspaces() {
               className="button__public-page"
               onChange={handleClassroomChange}
             >
-              <option value="">Select Classrooms</option>
+              <option value="">All Classrooms</option>
               {classrooms?.length > 0 ? (
                 classrooms?.map((c) => (
                   <option key={c?.class_code} value={c?.class_code}>
@@ -228,6 +352,7 @@ export default function Workspaces() {
                   id: "material_number",
                   show: "title",
                   data: classMaterials,
+                  edit: handleMaterialEdit,
                 })
               }
             >
@@ -242,7 +367,10 @@ export default function Workspaces() {
                   title: "Assignment List",
                   id: "assignment_number",
                   show: "title",
-                  data: assignments,
+                  data: !classCode
+                    ? assignments
+                    : assignments?.filter((a) => a?.class_code === classCode),
+                  edit: handleAssignmentEdit,
                 })
               }
             >
@@ -283,8 +411,8 @@ export default function Workspaces() {
                     isActive: true,
                     title: "ADD MATERIAL",
                     message: "Add material success",
-                    fields: fields,
-                    onSubmit: handleAdd,
+                    fields: materialFields,
+                    onSubmit: handleMaterialAdd,
                     setModal,
                   })
                 }
@@ -314,12 +442,22 @@ export default function Workspaces() {
           </FileDisplay>
         ) : null}
 
-        {list?.id === "assignment_number" ? <AssignmentInput /> : null}
+        {list?.id === "assignment_number" ? (
+          <AssignmentInput
+            class_code={classCode}
+            refreshData={refreshData}
+            switchLoading={switchLoading}
+            setAllertSetting={setAllertSetting}
+            createAssignment={createAssignment}
+          />
+        ) : null}
 
         {list?.id === "submission_number" ? (
           <>
-            <CodeDisplay span={{ row: 3, col: 1 }} />
-            <CodeOutput />
+            <CodeDisplay value={code} span={{ row: 3, col: 2 }} />
+            <Toolbar isResize={true}>
+              <CodeOutput />
+            </Toolbar>
           </>
         ) : null}
 
@@ -330,7 +468,7 @@ export default function Workspaces() {
           link={`${userRole}/classrooms/materials/`}
           disabled={true}
           onAction={handleAction}
-          onEdit={handleEdit}
+          onEdit={list?.edit}
         />
 
         {modal?.isActive && modal?.mode === "field" ? (
@@ -358,7 +496,9 @@ export default function Workspaces() {
               parent_id={classCode}
               item_id={"material_number"}
               item_show={"title"}
-              inBoxItems={classMaterials}
+              inBoxItems={classMaterials?.filter(
+                (cm) => cm?.class_code === classCode
+              )}
               outBoxItems={materials?.filter(
                 (m) =>
                   !classMaterials?.some(
