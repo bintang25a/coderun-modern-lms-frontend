@@ -194,7 +194,7 @@ export default function Classrooms() {
       {
         name: "class_code",
         label: "Class Code",
-        placeholder: "DDP-A1-2025",
+        placeholder: "DDPA12025 (no special char)",
         disabledOnEdit: true,
         value: item?.class_code,
       },

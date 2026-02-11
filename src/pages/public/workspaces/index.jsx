@@ -28,6 +28,7 @@ import Overlay from "../../../components/container/Overlay";
 import {
   createAssignment,
   getAssignments,
+  showAssignment,
   updateAssignment,
 } from "../../../_services/assignments";
 import CodeDisplay from "../../../components/grid-item/CodeDisplay";
@@ -35,6 +36,16 @@ import CodeOutput from "../../../components/grid-item/CodeOutput";
 import AssignmentInput from "../../../components/grid-item/AssignmentInput";
 import Toolbar from "../../../components/container/Toolbar";
 import { fileSubmission, showSubmission } from "../../../_services/submissions";
+import { createTestcase, deleteTestcase } from "../../../_services/testcases";
+import {
+  autoGrade,
+  downloadSubmissions,
+  grade,
+  runCode,
+} from "../../../_services/actions";
+import { FaBrain, FaDownload, FaSave } from "react-icons/fa";
+import CodeToolbar from "../../../components/action/CodeToolbar";
+import TestcaseToolbar from "../../../components/action/TestcaseToolbar";
 
 export default function Workspaces() {
   const {
@@ -49,9 +60,13 @@ export default function Workspaces() {
   const [classrooms, setClassrooms] = useState({});
   const [materials, setMaterials] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [assignment, setAssignment] = useState({});
   const [submissions, setSubmissions] = useState([]);
+  const [submission, setSubmission] = useState({});
   const [classMaterials, setClassMaterials] = useState([]);
   const [list, setList] = useState({});
+  const [classCode, setClassCode] = useState("");
+  const [assignmentNumber, setAssignmentNumber] = useState("");
 
   useEffect(() => {
     switchLoading(true);
@@ -106,7 +121,7 @@ export default function Workspaces() {
 
         setAssignments(assignmentsData);
         setClassMaterials(classMaterialsData);
-        setSubmissions(submissionsData);
+        setSubmissions(submissionsData?.filter((s) => !s?.grade));
 
         setList({
           title: "Material List",
@@ -141,30 +156,67 @@ export default function Workspaces() {
     setAssignments(state?.classroom);
   }, [state]);
 
-  const [classCode, setClassCode] = useState("");
   const handleClassroomChange = (e) => {
     const { value } = e.target;
 
     sessionStorage.setItem("class_code", value);
     setClassCode(value);
 
+    if (list?.id === "material_number") {
+      return setList({
+        ...list,
+        data: !classCode
+          ? classMaterials
+          : classMaterials?.filter((cm) => cm?.class_code === value),
+      });
+    }
+
     if (list?.id === "assignment_number") {
-      setList({
-        title: "Assignment List",
-        id: "assignment_number",
-        show: "title",
+      return setList({
+        ...list,
         data: !value
           ? assignments
           : assignments?.filter((a) => a?.class_code === value),
-        edit: handleAssignmentEdit,
+      });
+    }
+
+    if (list?.id === "submission_number") {
+      return setList({
+        ...list,
+        data: !value
+          ? submissions
+          : submissions?.filter((s) => s?.assignment_number?.includes(value)),
+      });
+    }
+  };
+
+  const handleAssignmentChange = async (e) => {
+    const { value } = e.target;
+
+    sessionStorage.setItem("assignment_number", value);
+    setAssignmentNumber(value);
+
+    const class_code = value.split("-")[0];
+
+    const assignmentData = await showAssignment(class_code, value);
+
+    sessionStorage.setItem("class_code", assignmentData?.class_code);
+    setClassCode(assignmentData?.class_code);
+
+    setAssignment(assignmentData);
+
+    if (list?.id === "submission_number") {
+      return setList({
+        ...list,
+        data: !value
+          ? submissions
+          : submissions?.filter((s) => s?.assignment_number === value),
       });
     }
   };
 
   // ===== HANDLE LIST CLICK =====
-  const [submission, setSubmission] = useState({});
   const [blob, setBlob] = useState(null);
-  const [code, setCode] = useState("");
 
   const handleAction = async (id) => {
     try {
@@ -180,10 +232,28 @@ export default function Workspaces() {
           fileSubmission(temp?.assignment_number, id),
         ]);
 
+        const ext = submissionData?.answer?.slice(
+          submissionData?.answer?.lastIndexOf(".")
+        );
+
+        const lang = {
+          ".c": "c",
+          ".cpp": "cpp",
+          ".java": "java",
+          ".py": "python",
+          ".pdf": "pdf",
+        };
+
         setSubmission(submissionData);
+        setGradeData(submissionData?.grade || 0);
+
         fileData.type === "application/pdf"
           ? setBlob(URL.createObjectURL(fileData))
-          : setCode(await fileData.text());
+          : setFormCode({
+              ...formCode,
+              code: await fileData.text(),
+              language: lang[ext],
+            });
       }
     } catch (error) {
       console.log(error);
@@ -318,6 +388,201 @@ export default function Workspaces() {
     });
   };
 
+  // ===== HANDLE SUBMISSION =====
+  const [output, setOutput] = useState("");
+  const [formCode, setFormCode] = useState({ timeLimit: 500, input: "" });
+  const [gradeData, setGradeData] = useState(submission?.grade || 0);
+
+  // ===== SETUP RUN CODE =====
+  const handleCodeChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormCode({
+      ...formCode,
+      [name]: value,
+    });
+  };
+
+  const handleRunCode = async () => {
+    try {
+      const response = await runCode(formCode);
+
+      setOutput(response.output);
+    } catch (error) {
+      console.log(error);
+
+      setAllertSetting({
+        isActive: true,
+        message: error,
+      });
+    }
+  };
+
+  const handleRunExample = async () => {
+    const formData = {
+      ...formCode,
+      codePath: assignment?.answer_key,
+    };
+
+    try {
+      const response = await runCode(formData);
+
+      setOutput(response.output);
+    } catch (error) {
+      console.log(error);
+
+      setAllertSetting({
+        isActive: true,
+        message: error,
+      });
+    }
+  };
+
+  const [fs, setFs] = useState(0);
+  const handleFontSize = () => {
+    if (fs === 3) {
+      setFs(0);
+    } else {
+      setFs(fs + 1);
+    }
+  };
+
+  // ===== SETUP TESTCASE =====
+  const handleTestcaseSubmit = async (data) => {
+    await createTestcase(assignment?.assignment_number, data);
+  };
+
+  const handleTestcaseDelete = async (data) => {
+    await deleteTestcase(assignment?.assignment_number, data?.testcase_number);
+  };
+
+  // ===== SETUP GRADE SUBMISSION =====
+  const handleGradeChange = (e) => {
+    const { value } = e.target;
+
+    setGradeData(value);
+  };
+
+  const handleGradeSubmit = async () => {
+    switchLoading(true);
+
+    const formData = {
+      submission_number: submission?.submission_number,
+      assignment_number: submission?.assignment_number,
+      grade: gradeData,
+    };
+
+    try {
+      await grade(formData);
+
+      setAllertSetting({
+        isActive: true,
+        message: "Grade saved",
+        isSuccess: true,
+      });
+
+      refreshData();
+    } catch (error) {
+      console.log(error);
+
+      setAllertSetting({
+        isActive: true,
+        message: error,
+      });
+    } finally {
+      setTimeout(() => switchLoading(false), 100);
+    }
+  };
+
+  // ===== SETUP DOWNLOAD =====
+  const handleDownload = async () => {
+    try {
+      await downloadSubmissions(assignment?.assignment_number);
+    } catch (error) {
+      console.log(error);
+
+      setAllertSetting({
+        isActive: true,
+        message: error,
+      });
+    }
+  };
+
+  // ===== SETUP AUTO GRADE =====
+  const autoGradeForm = {
+    assignment_number: assignment?.assignment_number,
+    language: formCode?.language,
+    timeLimit: Math.max(Number(formCode?.timeLimit), 2000),
+    test_cases: assignment?.testcases,
+    testcasesLength: `${assignment?.testcases?.length} Testcases`,
+    concurrency: 3,
+    regrade: false,
+  };
+
+  const autoGradeFields = [
+    {
+      name: "assignment_number",
+      label: `${assignment?.title} - [${assignment?.assignment_number}]`,
+      disabledOnEdit: true,
+    },
+    {
+      name: "language",
+      label: "Code Language",
+    },
+    {
+      name: "concurrency",
+      label: "Concurrency",
+      type: "number",
+    },
+    {
+      name: "testcasesLength",
+      label: "Total Testcase",
+      disabledOnEdit: true,
+    },
+    {
+      type: "select",
+      name: "timeLimit",
+      label: "Time Limit",
+      options: [
+        {
+          label: "2s",
+          value: 2000,
+        },
+        {
+          label: "5s",
+          value: 5000,
+        },
+        {
+          label: "10s",
+          value: 10000,
+        },
+        {
+          label: "20s",
+          value: 20000,
+        },
+      ],
+    },
+    {
+      name: "regrade",
+      label: "Allow Regrade",
+      type: "select",
+      options: [
+        {
+          value: true,
+          label: "True",
+        },
+        {
+          value: false,
+          label: "False",
+        },
+      ],
+    },
+  ];
+
+  const submitAutoGrade = async (temp, data) => {
+    await autoGrade(data);
+  };
+
   return (
     <main className="__public-page">
       <nav className="navbar__public-page">
@@ -326,21 +591,42 @@ export default function Workspaces() {
         </section>
         <section className="right__public-page">
           <div className="action__public-page">
-            <select
-              className="button__public-page"
-              onChange={handleClassroomChange}
-            >
-              <option value="">All Classrooms</option>
-              {classrooms?.length > 0 ? (
-                classrooms?.map((c) => (
-                  <option key={c?.class_code} value={c?.class_code}>
-                    {c?.name}
-                  </option>
-                ))
-              ) : (
-                <option value="">No Classrooms</option>
-              )}
-            </select>
+            {list?.id === "submission_number" ? (
+              <select
+                className="button__public-page"
+                onChange={handleAssignmentChange}
+              >
+                <option value="">All Assignments</option>
+                {assignments?.length > 0 ? (
+                  assignments?.map((a) => (
+                    <option
+                      key={a?.assignment_number}
+                      value={a?.assignment_number}
+                    >
+                      {a?.title}
+                    </option>
+                  ))
+                ) : (
+                  <option value="">No Assignments</option>
+                )}
+              </select>
+            ) : (
+              <select
+                className="button__public-page"
+                onChange={handleClassroomChange}
+              >
+                <option value="">All Classrooms</option>
+                {classrooms?.length > 0 ? (
+                  classrooms?.map((c) => (
+                    <option key={c?.class_code} value={c?.class_code}>
+                      {c?.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="">No Classrooms</option>
+                )}
+              </select>
+            )}
             <button
               className={`button__public-page ${
                 list?.id === "material_number" ? "active" : ""
@@ -350,7 +636,11 @@ export default function Workspaces() {
                   title: "Material List",
                   id: "material_number",
                   show: "title",
-                  data: classMaterials,
+                  data: !classCode
+                    ? classMaterials
+                    : classMaterials?.filter(
+                        (cm) => cm?.class_code === classCode
+                      ),
                   edit: handleMaterialEdit,
                 })
               }
@@ -385,7 +675,11 @@ export default function Workspaces() {
                   title: "Submission List",
                   id: "submission_number",
                   show: "student_uid",
-                  data: submissions,
+                  data: !classCode
+                    ? submissions
+                    : submissions?.filter((s) =>
+                        s?.assignment_number?.includes(classCode)
+                      ),
                 })
               }
             >
@@ -454,13 +748,96 @@ export default function Workspaces() {
         {list?.id === "submission_number" ? (
           <>
             <CodeDisplay
-              value={code}
-              // handleChange={handleCodeChange}
-              // fontSize={fs}
+              value={formCode?.code}
+              handleChange={handleCodeChange}
+              fontSize={fs}
               span={{ row: 3, col: 2 }}
-            ></CodeDisplay>
+            >
+              <div className="toolbar__public-page">
+                <input
+                  className="toolbar-item__public-page"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  name="grade"
+                  id="grade"
+                  placeholder="Grade"
+                  value={gradeData}
+                  onChange={handleGradeChange}
+                  disabled={!submission}
+                />
+                <button
+                  className="toolbar-item__public-page"
+                  onClick={handleGradeSubmit}
+                  disabled={!gradeData || gradeData === submission?.grade}
+                >
+                  <FaSave />
+                  Save Grade
+                </button>
+                <button
+                  className="toolbar-item__public-page"
+                  disabled={
+                    assignment?.testcases?.length === 0 ||
+                    !classCode ||
+                    !assignment
+                  }
+                  onClick={() =>
+                    toggleModal({
+                      title: "AUTO GRADE SETUP",
+                      message: "Auto Grade Finish",
+                      isActive: true,
+                      isEdit: true,
+                      isVertical: false,
+                      item: autoGradeForm,
+                      fields: autoGradeFields,
+                      onSubmit: submitAutoGrade,
+                      setModal,
+                    })
+                  }
+                >
+                  <FaBrain /> Auto Grade
+                </button>
+                <button
+                  className="toolbar-item__public-page"
+                  onClick={handleDownload}
+                  disabled={
+                    assignment?.submissions?.length === 0 ||
+                    !classCode ||
+                    !assignment
+                  }
+                >
+                  <FaDownload /> Download All
+                </button>
+              </div>
+            </CodeDisplay>
+
             <Toolbar isResize={true}>
-              <CodeOutput />
+              <CodeOutput
+                value={formCode?.input}
+                handleChange={handleCodeChange}
+                output={output}
+                fontSize={fs}
+              />
+            </Toolbar>
+
+            <Toolbar id={3}>
+              <CodeToolbar
+                formData={formCode}
+                setFormData={setFormCode}
+                runCode={handleRunCode}
+                runExample={handleRunExample}
+                fontSize={handleFontSize}
+              />
+            </Toolbar>
+
+            <Toolbar id={2}>
+              <TestcaseToolbar
+                testcases={assignment?.testcases}
+                toggleModal={toggleModal}
+                setModal={setModal}
+                onSubmit={handleTestcaseSubmit}
+                onDelete={handleTestcaseDelete}
+              />
             </Toolbar>
           </>
         ) : null}

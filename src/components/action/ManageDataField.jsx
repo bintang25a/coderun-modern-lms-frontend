@@ -25,6 +25,10 @@ const ManageDataField = ({
 
     if (type === "file") {
       setFormData((prev) => ({ ...prev, [name]: files[0] }));
+    } else if (name === item_id) {
+      const cleanValue = value.replace(/[^a-zA-Z0-9]/g, "");
+      
+      setFormData((prev) => ({ ...prev, [name]: cleanValue }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
